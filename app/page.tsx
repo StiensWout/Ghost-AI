@@ -1,7 +1,10 @@
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-base text-copy-primary">
-      Ghost AI
-    </main>
-  );
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
+import { editorUrl, signInPath } from "@/lib/auth-routes";
+
+export default async function Home() {
+  const { isAuthenticated } = await auth();
+
+  redirect(isAuthenticated ? editorUrl : signInPath);
 }
