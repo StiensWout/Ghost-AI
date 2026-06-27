@@ -16,14 +16,14 @@ interface ProjectDialogsProps {
 }
 
 export function ProjectDialogs({ controller }: ProjectDialogsProps) {
-  const { activeDialog, closeDialog } = controller
+  const { activeDialog, isLoading, closeDialog } = controller
   const isOpen = activeDialog !== null
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) {
+        if (!open && !isLoading) {
           closeDialog()
         }
       }}
@@ -65,7 +65,12 @@ function CreateProjectDialog({ controller }: ProjectDialogsProps) {
       description="Start a new architecture workspace."
       footer={
         <>
-          <Button type="button" variant="outline" onClick={closeDialog}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeDialog}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button
@@ -142,7 +147,12 @@ function RenameProjectDialog({ controller }: ProjectDialogsProps) {
       }
       footer={
         <>
-          <Button type="button" variant="outline" onClick={closeDialog}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeDialog}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button
@@ -190,7 +200,12 @@ function DeleteProjectDialog({ controller }: ProjectDialogsProps) {
       description="This action cannot be undone."
       footer={
         <>
-          <Button type="button" variant="outline" onClick={closeDialog}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeDialog}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button

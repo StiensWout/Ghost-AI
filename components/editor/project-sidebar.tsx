@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { Pencil, Plus, Trash2, X } from "lucide-react"
 
@@ -19,6 +20,13 @@ interface ProjectSidebarProps {
   onRenameProject?: (project: ProjectSidebarItem) => void
   onDeleteProject?: (project: ProjectSidebarItem) => void
   className?: string
+}
+
+type ProjectTab = "my-projects" | "shared"
+
+interface ProjectTabState {
+  activeProjectId?: string
+  tab: ProjectTab
 }
 
 function EmptyProjectState({ children }: { children: React.ReactNode }) {
@@ -119,6 +127,22 @@ export function ProjectSidebar({
   onDeleteProject,
   className,
 }: ProjectSidebarProps) {
+  const activeProjectTab = useMemo<ProjectTab>(() => {
+    const isSharedProject = sharedProjects.some(
+      (project) => project.id === activeProjectId
+    )
+
+    return isSharedProject ? "shared" : "my-projects"
+  }, [activeProjectId, sharedProjects])
+  const [tabState, setTabState] = useState<ProjectTabState>({
+    activeProjectId,
+    tab: activeProjectTab,
+  })
+  const activeTab =
+    tabState.activeProjectId === activeProjectId
+      ? tabState.tab
+      : activeProjectTab
+
   return (
     <>
       {isOpen ? (
@@ -153,7 +177,18 @@ export function ProjectSidebar({
           </Button>
         </div>
 
-        <Tabs defaultValue="my-projects" className="min-h-0 flex-1 gap-4 p-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => {
+            if (isProjectTab(value)) {
+              setTabState({
+                activeProjectId,
+                tab: value,
+              })
+            }
+          }}
+          className="min-h-0 flex-1 gap-4 p-4"
+        >
           <TabsList className="grid w-full grid-cols-2 bg-subtle">
             <TabsTrigger value="my-projects">My Projects</TabsTrigger>
             <TabsTrigger value="shared">Shared</TabsTrigger>
@@ -185,4 +220,8 @@ export function ProjectSidebar({
       </aside>
     </>
   )
+}
+
+function isProjectTab(value: string): value is ProjectTab {
+  return value === "my-projects" || value === "shared"
 }

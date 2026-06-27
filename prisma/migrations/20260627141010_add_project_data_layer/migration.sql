@@ -1,4 +1,6 @@
 -- CreateEnum
+CREATE EXTENSION IF NOT EXISTS "citext";
+
 CREATE TYPE "ProjectStatus" AS ENUM ('DRAFT', 'ARCHIVED');
 
 -- CreateTable
@@ -18,15 +20,14 @@ CREATE TABLE "Project" (
 -- CreateTable
 CREATE TABLE "ProjectCollaborator" (
     "projectId" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "email" CITEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ProjectCollaborator_email_normalized_check" CHECK ("email"::text = lower("email"::text))
 );
 
 -- CreateIndex
-CREATE INDEX "Project_ownerId_idx" ON "Project"("ownerId");
-
--- CreateIndex
-CREATE INDEX "Project_createdAt_idx" ON "Project"("createdAt");
+CREATE INDEX "Project_ownerId_updatedAt_idx" ON "Project"("ownerId", "updatedAt" DESC);
 
 -- CreateIndex
 CREATE INDEX "ProjectCollaborator_email_idx" ON "ProjectCollaborator"("email");

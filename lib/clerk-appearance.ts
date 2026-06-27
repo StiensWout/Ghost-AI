@@ -92,6 +92,19 @@ const userProfileElements = {
     borderColor: "var(--border-default)",
     boxShadow: "none",
   },
+  badge: {
+    background: "var(--bg-elevated)",
+    border: "1px solid var(--border-subtle)",
+    borderRadius: "999px",
+    boxShadow: "none",
+    color: "var(--text-primary)",
+    fontWeight: "650",
+  },
+  badge__primary: {
+    background: "var(--accent-primary-dim)",
+    border: "1px solid color-mix(in srgb, var(--accent-primary), transparent 45%)",
+    color: "var(--accent-primary)",
+  },
   headerTitle: {
     fontSize: "1.625rem",
     lineHeight: "1.15",

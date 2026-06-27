@@ -2,7 +2,7 @@ import "server-only"
 
 import { auth, currentUser } from "@clerk/nextjs/server"
 
-import type { Prisma } from "@/app/generated/prisma/client"
+import { Prisma } from "@/app/generated/prisma/client"
 import prisma from "@/lib/prisma"
 import type {
   ProjectAccess,
@@ -62,6 +62,12 @@ export function jsonError(message: string, status: number) {
   return Response.json({ error: message }, { status })
 }
 
+export function isPrismaKnownRequestError(error: unknown, code: string) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError && error.code === code
+  )
+}
+
 export function serializeProject(project: SelectedProject): ProjectApiResource {
   return {
     id: project.id,
@@ -87,8 +93,9 @@ export async function getProjectSidebarListsForCurrentUser(): Promise<ProjectSid
 
   const user = await currentUser()
   const emailAddress = user?.primaryEmailAddress?.emailAddress
-    ?.trim()
-    .toLowerCase()
+  const collaboratorEmail = emailAddress
+    ? normalizeCollaboratorEmail(emailAddress)
+    : null
 
   const ownedProjectsRequest = prisma.project.findMany({
     where: {
@@ -100,7 +107,7 @@ export async function getProjectSidebarListsForCurrentUser(): Promise<ProjectSid
     select: projectSelect,
   })
 
-  const sharedProjectsRequest = emailAddress
+  const sharedProjectsRequest = collaboratorEmail
     ? prisma.project.findMany({
         where: {
           ownerId: {
@@ -108,7 +115,7 @@ export async function getProjectSidebarListsForCurrentUser(): Promise<ProjectSid
           },
           collaborators: {
             some: {
-              email: emailAddress,
+              email: collaboratorEmail,
             },
           },
         },
@@ -132,6 +139,10 @@ export async function getProjectSidebarListsForCurrentUser(): Promise<ProjectSid
       serializeProjectSidebarItem(project, "collaborator")
     ),
   }
+}
+
+export function normalizeCollaboratorEmail(email: string) {
+  return email.trim().toLowerCase()
 }
 
 export async function readJsonObject(request: Request) {

@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import {
+  isPrismaKnownRequestError,
   jsonError,
   projectSelect,
   readCreateProjectName,
@@ -71,19 +72,53 @@ export async function POST(request: Request) {
     }
   }
 
-  const project = await prisma.project.create({
-    data: {
-      ...(projectId ? { id: projectId } : {}),
-      ownerId: authResult.user.userId,
-      name,
-    },
-    select: projectSelect,
+  const createResult = await createProject({
+    id: projectId,
+    ownerId: authResult.user.userId,
+    name,
   })
+
+  if (!createResult.ok) {
+    return createResult.response
+  }
 
   return Response.json(
     {
-      project: serializeProject(project),
+      project: serializeProject(createResult.project),
     },
     { status: 201 }
   )
+}
+
+interface CreateProjectInput {
+  id?: string
+  ownerId: string
+  name: string
+}
+
+async function createProject({ id, ownerId, name }: CreateProjectInput) {
+  try {
+    const project = await prisma.project.create({
+      data: {
+        ...(id ? { id } : {}),
+        ownerId,
+        name,
+      },
+      select: projectSelect,
+    })
+
+    return {
+      ok: true,
+      project,
+    } as const
+  } catch (error) {
+    if (id && isPrismaKnownRequestError(error, "P2002")) {
+      return {
+        ok: false,
+        response: jsonError("Project ID already exists", 409),
+      } as const
+    }
+
+    throw error
+  }
 }

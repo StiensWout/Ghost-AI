@@ -22,12 +22,6 @@ export async function PATCH(request: Request, context: ProjectRouteContext) {
   }
 
   const { projectId } = await context.params
-  const accessResult = await requireProjectOwner(projectId, authResult.user.userId)
-
-  if (!accessResult.ok) {
-    return accessResult.response
-  }
-
   const body = await readJsonObject(request)
 
   if (!body) {
@@ -40,15 +34,20 @@ export async function PATCH(request: Request, context: ProjectRouteContext) {
     return jsonError("Project name is required", 400)
   }
 
-  const project = await prisma.project.update({
+  const [project] = await prisma.project.updateManyAndReturn({
     where: {
       id: projectId,
+      ownerId: authResult.user.userId,
     },
     data: {
       name,
     },
     select: projectSelect,
   })
+
+  if (!project) {
+    return getMissingOrForbiddenProjectResponse(projectId)
+  }
 
   return Response.json({
     project: serializeProject(project),
@@ -63,34 +62,21 @@ export async function DELETE(_request: Request, context: ProjectRouteContext) {
   }
 
   const { projectId } = await context.params
-  const accessResult = await requireProjectOwner(projectId, authResult.user.userId)
-
-  if (!accessResult.ok) {
-    return accessResult.response
-  }
-
-  await prisma.project.delete({
+  const deleteResult = await prisma.project.deleteMany({
     where: {
       id: projectId,
+      ownerId: authResult.user.userId,
     },
   })
+
+  if (deleteResult.count === 0) {
+    return getMissingOrForbiddenProjectResponse(projectId)
+  }
 
   return Response.json({ success: true })
 }
 
-type OwnerCheckResult =
-  | {
-      ok: true
-    }
-  | {
-      ok: false
-      response: Response
-    }
-
-async function requireProjectOwner(
-  projectId: string,
-  userId: string
-): Promise<OwnerCheckResult> {
+async function getMissingOrForbiddenProjectResponse(projectId: string) {
   const project = await prisma.project.findUnique({
     where: {
       id: projectId,
@@ -101,18 +87,8 @@ async function requireProjectOwner(
   })
 
   if (!project) {
-    return {
-      ok: false,
-      response: jsonError("Project not found", 404),
-    }
+    return jsonError("Project not found", 404)
   }
 
-  if (project.ownerId !== userId) {
-    return {
-      ok: false,
-      response: jsonError("Forbidden", 403),
-    }
-  }
-
-  return { ok: true }
+  return jsonError("Forbidden", 403)
 }

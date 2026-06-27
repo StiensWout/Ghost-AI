@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import type { ProjectSidebarItem } from "@/types/projects"
@@ -45,6 +45,8 @@ export function useProjectActions({
   const [activeDialog, setActiveDialog] = useState<ActiveProjectDialog | null>(
     null
   )
+  const activeDialogRef = useRef<ActiveProjectDialog | null>(null)
+  const requestIdRef = useRef(0)
   const [createProjectName, setCreateProjectName] = useState("")
   const [createRoomSuffix, setCreateRoomSuffix] = useState(generateShortSuffix)
   const [renameProjectName, setRenameProjectName] = useState("")
@@ -71,16 +73,18 @@ export function useProjectActions({
     createProjectName.trim().length > 0 && createProjectRoomId !== null
 
   function closeDialog() {
-    setActiveDialog(null)
+    requestIdRef.current += 1
+    updateActiveDialog(null)
     setIsLoading(false)
     setErrorMessage(null)
   }
 
   function openCreateDialog() {
+    requestIdRef.current += 1
     setCreateProjectName("")
     setCreateRoomSuffix(generateShortSuffix())
     setErrorMessage(null)
-    setActiveDialog({ type: "create", project: null })
+    updateActiveDialog({ type: "create", project: null })
   }
 
   function updateCreateProjectName(name: string) {
@@ -94,8 +98,9 @@ export function useProjectActions({
     }
 
     setRenameProjectName(project.name)
+    requestIdRef.current += 1
     setErrorMessage(null)
-    setActiveDialog({ type: "rename", project })
+    updateActiveDialog({ type: "rename", project })
   }
 
   function openDeleteDialog(project: ProjectSidebarItem) {
@@ -103,8 +108,9 @@ export function useProjectActions({
       return
     }
 
+    requestIdRef.current += 1
     setErrorMessage(null)
-    setActiveDialog({ type: "delete", project })
+    updateActiveDialog({ type: "delete", project })
   }
 
   async function createProject() {
@@ -116,6 +122,7 @@ export function useProjectActions({
 
     setIsLoading(true)
     setErrorMessage(null)
+    const requestId = startRequest()
 
     try {
       const project = await requestProjectMutation("/api/projects", {
@@ -126,9 +133,17 @@ export function useProjectActions({
         }),
       })
 
+      if (!isActiveRequest(requestId, "create")) {
+        return
+      }
+
       closeDialog()
       router.push(getProjectWorkspacePath(project.id))
     } catch (error) {
+      if (!isActiveRequest(requestId, "create")) {
+        return
+      }
+
       setErrorMessage(getErrorMessage(error, "Unable to create project."))
       setIsLoading(false)
     }
@@ -144,6 +159,7 @@ export function useProjectActions({
 
     setIsLoading(true)
     setErrorMessage(null)
+    const requestId = startRequest()
 
     try {
       await requestProjectMutation(
@@ -154,9 +170,17 @@ export function useProjectActions({
         }
       )
 
+      if (!isActiveRequest(requestId, "rename", project.id)) {
+        return
+      }
+
       closeDialog()
       router.refresh()
     } catch (error) {
+      if (!isActiveRequest(requestId, "rename", project.id)) {
+        return
+      }
+
       setErrorMessage(getErrorMessage(error, "Unable to rename project."))
       setIsLoading(false)
     }
@@ -171,6 +195,7 @@ export function useProjectActions({
 
     setIsLoading(true)
     setErrorMessage(null)
+    const requestId = startRequest()
 
     try {
       await requestProjectDelete(
@@ -181,6 +206,10 @@ export function useProjectActions({
         project.id === activeProjectId ||
         pathname === getProjectWorkspacePath(project.id)
 
+      if (!isActiveRequest(requestId, "delete", project.id)) {
+        return
+      }
+
       closeDialog()
 
       if (shouldRedirectHome) {
@@ -190,9 +219,37 @@ export function useProjectActions({
 
       router.refresh()
     } catch (error) {
+      if (!isActiveRequest(requestId, "delete", project.id)) {
+        return
+      }
+
       setErrorMessage(getErrorMessage(error, "Unable to delete project."))
       setIsLoading(false)
     }
+  }
+
+  function updateActiveDialog(dialog: ActiveProjectDialog | null) {
+    activeDialogRef.current = dialog
+    setActiveDialog(dialog)
+  }
+
+  function startRequest() {
+    requestIdRef.current += 1
+    return requestIdRef.current
+  }
+
+  function isActiveRequest(
+    requestId: number,
+    type: ProjectDialogType,
+    projectId?: string
+  ) {
+    const dialog = activeDialogRef.current
+
+    return (
+      requestIdRef.current === requestId &&
+      dialog?.type === type &&
+      (!projectId || dialog.project?.id === projectId)
+    )
   }
 
   return {
