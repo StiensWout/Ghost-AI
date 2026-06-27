@@ -1,19 +1,23 @@
 "use client"
 
+import Link from "next/link"
 import { Pencil, Plus, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { MockProject } from "@/components/editor/use-project-dialogs"
+import { getProjectWorkspacePath } from "@/hooks/use-project-actions"
 import { cn } from "@/lib/utils"
+import type { ProjectSidebarItem } from "@/types/projects"
 
 interface ProjectSidebarProps {
   isOpen: boolean
+  activeProjectId?: string
   onClose?: () => void
   onNewProject?: () => void
-  projects: MockProject[]
-  onRenameProject?: (project: MockProject) => void
-  onDeleteProject?: (project: MockProject) => void
+  ownedProjects: ProjectSidebarItem[]
+  sharedProjects: ProjectSidebarItem[]
+  onRenameProject?: (project: ProjectSidebarItem) => void
+  onDeleteProject?: (project: ProjectSidebarItem) => void
   className?: string
 }
 
@@ -27,12 +31,16 @@ function EmptyProjectState({ children }: { children: React.ReactNode }) {
 
 function ProjectList({
   projects,
+  activeProjectId,
+  onClose,
   onRenameProject,
   onDeleteProject,
 }: {
-  projects: MockProject[]
-  onRenameProject?: (project: MockProject) => void
-  onDeleteProject?: (project: MockProject) => void
+  projects: ProjectSidebarItem[]
+  activeProjectId?: string
+  onClose?: () => void
+  onRenameProject?: (project: ProjectSidebarItem) => void
+  onDeleteProject?: (project: ProjectSidebarItem) => void
 }) {
   if (projects.length === 0) {
     return <EmptyProjectState>No projects yet.</EmptyProjectState>
@@ -42,23 +50,32 @@ function ProjectList({
     <div className="space-y-2">
       {projects.map((project) => {
         const showActions = project.access === "owner"
+        const isActive = project.id === activeProjectId
 
         return (
           <div
             key={project.id}
-            className="group flex min-h-16 items-center gap-3 rounded-2xl border border-surface-border bg-surface/80 px-3 py-2"
+            className={cn(
+              "group flex min-h-16 items-center gap-3 rounded-2xl border border-surface-border bg-surface/80 px-3 py-2",
+              isActive && "border-brand/60 bg-accent-dim"
+            )}
           >
-            <div className="min-w-0 flex-1">
+            <Link
+              href={getProjectWorkspacePath(project.id)}
+              aria-current={isActive ? "page" : undefined}
+              className="min-w-0 flex-1 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              onClick={onClose}
+            >
               <p className="truncate text-sm font-medium text-copy-primary">
                 {project.name}
               </p>
               <p className="mt-1 truncate font-mono text-xs text-copy-muted">
-                /{project.slug}
+                /{project.roomId}
               </p>
               <p className="mt-1 text-xs text-copy-faint">
                 {project.updatedAtLabel}
               </p>
-            </div>
+            </Link>
 
             {showActions ? (
               <div className="flex shrink-0 items-center gap-1">
@@ -93,18 +110,15 @@ function ProjectList({
 
 export function ProjectSidebar({
   isOpen,
+  activeProjectId,
   onClose,
   onNewProject,
-  projects,
+  ownedProjects,
+  sharedProjects,
   onRenameProject,
   onDeleteProject,
   className,
 }: ProjectSidebarProps) {
-  const ownedProjects = projects.filter((project) => project.access === "owner")
-  const sharedProjects = projects.filter(
-    (project) => project.access === "collaborator"
-  )
-
   return (
     <>
       {isOpen ? (
@@ -147,12 +161,18 @@ export function ProjectSidebar({
           <TabsContent value="my-projects" className="mt-0">
             <ProjectList
               projects={ownedProjects}
+              activeProjectId={activeProjectId}
+              onClose={onClose}
               onRenameProject={onRenameProject}
               onDeleteProject={onDeleteProject}
             />
           </TabsContent>
           <TabsContent value="shared" className="mt-0">
-            <ProjectList projects={sharedProjects} />
+            <ProjectList
+              projects={sharedProjects}
+              activeProjectId={activeProjectId}
+              onClose={onClose}
+            />
           </TabsContent>
         </Tabs>
 
