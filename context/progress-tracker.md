@@ -12,6 +12,9 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Project dialog follow-up fixes from current review findings.
+- Current visual issue cleanup from `context/current-issues.md`.
+- Project dialogs and editor home from `context/feature-specs/04-project-dialogs.md`.
 - Design system and UI primitive setup from `context/feature-specs/01-design-system.md`.
 - Editor chrome components from `context/feature-specs/02-editor-chrome.md`.
 - Authentication wiring from `context/feature-specs/03-auth.md`.
@@ -41,6 +44,21 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Completed project dialog follow-up fixes from current review findings.
+- Reconciled `context/current-issues.md` with `context/progress-tracker.md` so resolved visual cleanup items are no longer listed as open.
+- Aligned project create slug preview and saved slug fallback, and updated rename to keep project name and slug in sync.
+- Clarified `context/feature-specs/04-project-dialogs.md` so the navbar is protected while sidebar behavior may change for the explicit sidebar requirements.
+- Verified with `npx tsc --noEmit`, `npm run lint`, and `npm run build`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Completed current visual issue cleanup from `context/current-issues.md`.
+- Improved project name field contrast in create and rename project dialogs with explicit theme-token text, placeholder, caret, border, and surface classes.
+- Added a subtle token-based texture layer to the editor content window without changing navbar or sidebar behavior.
+- Verified with `npx tsc --noEmit`, `npm run lint`, and `npm run build`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Confirmed the existing dev server on port 3000 responds and protects `/editor` with a signed-out redirect; T3 preview navigation still failed at the automation layer.
+- Completed project dialogs and editor home from `context/feature-specs/04-project-dialogs.md`.
+- Added mock owned/shared project data, owner-only sidebar rename/delete actions, and a mobile sidebar backdrop scrim.
+- Added create, rename, and delete project dialogs backed by a dedicated project dialog hook with dialog, form, loading, and mock project state.
+- Verified with `npx tsc --noEmit`, `npm run lint`, and `npm run build`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Confirmed the existing dev server on port 3000 responds and protects `/editor` with a signed-out redirect; T3 preview navigation stayed on `chrome-error://chromewebdata/`, so browser interaction verification was blocked by preview access.
 - Moved the editor chrome route from `/layout` to `/editor`.
 - Split Clerk base appearance from auth-page appearance and reduced auth shell/button scale for a more balanced sign-in/sign-up UI.
 - Refined the sign-in/sign-up shell against the original reference by removing the oversized left accent block, improving feature text contrast, and tightening Clerk card spacing.
