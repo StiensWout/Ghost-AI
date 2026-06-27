@@ -33,6 +33,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Addressed editor chrome review follow-ups for nullish React node rendering and closed sidebar inertness.
 - Started implementation of `context/feature-specs/02-editor-chrome.md`.
 - Added `EditorNavbar`, `ProjectSidebar`, and a reusable editor dialog content pattern.
 - Verified editor chrome with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.

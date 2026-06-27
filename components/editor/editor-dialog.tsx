@@ -38,16 +38,18 @@ export function EditorDialogContent({
         <DialogTitle className="text-lg font-medium leading-none text-copy-primary">
           {title}
         </DialogTitle>
-        {description ? (
+        {description !== null && description !== undefined ? (
           <DialogDescription className="text-sm leading-6 text-copy-muted">
             {description}
           </DialogDescription>
         ) : null}
       </DialogHeader>
 
-      {children ? <div className="text-sm text-copy-secondary">{children}</div> : null}
+      {children !== null && children !== undefined ? (
+        <div className="text-sm text-copy-secondary">{children}</div>
+      ) : null}
 
-      {footer ? (
+      {footer !== null && footer !== undefined ? (
         <DialogFooter className="-mx-6 -mb-6 rounded-b-3xl border-t border-surface-border bg-surface p-4">
           {footer}
         </DialogFooter>
