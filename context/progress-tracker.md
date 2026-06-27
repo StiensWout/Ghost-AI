@@ -8,11 +8,12 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Install and configure the design system primitives from `context/feature-specs/01-design-system.md`.
+- Prepare the next feature unit from `context/feature-specs/`.
 
 ## Completed
 
 - Design system and UI primitive setup from `context/feature-specs/01-design-system.md`.
+- Editor chrome components from `context/feature-specs/02-editor-chrome.md`.
 
 ## In Progress
 
@@ -32,6 +33,9 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Started implementation of `context/feature-specs/02-editor-chrome.md`.
+- Added `EditorNavbar`, `ProjectSidebar`, and a reusable editor dialog content pattern.
+- Verified editor chrome with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
 - Started implementation of `context/feature-specs/01-design-system.md`.
 - Initialized shadcn/ui with the Nova Radix preset and added Button, Card, Dialog, Input, Tabs, Textarea, and ScrollArea primitives.
 - Replaced the generated light/dark CSS variables with the documented Ghost AI dark-only token map and enabled the root `dark` class for shadcn variants.
