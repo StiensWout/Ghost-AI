@@ -6,24 +6,24 @@ import { Button } from "@/components/ui/button"
 import { Dialog } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { EditorDialogContent } from "@/components/editor/editor-dialog"
-import type { ProjectDialogsController } from "@/components/editor/use-project-dialogs"
+import type { ProjectActionsController } from "@/hooks/use-project-actions"
 
 const projectNameInputClassName =
   "border-surface-border-subtle bg-surface text-copy-primary caret-brand placeholder:text-copy-muted"
 
 interface ProjectDialogsProps {
-  controller: ProjectDialogsController
+  controller: ProjectActionsController
 }
 
 export function ProjectDialogs({ controller }: ProjectDialogsProps) {
-  const { activeDialog, closeDialog } = controller
+  const { activeDialog, isLoading, closeDialog } = controller
   const isOpen = activeDialog !== null
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) {
+        if (!open && !isLoading) {
           closeDialog()
         }
       }}
@@ -44,8 +44,11 @@ export function ProjectDialogs({ controller }: ProjectDialogsProps) {
 function CreateProjectDialog({ controller }: ProjectDialogsProps) {
   const {
     createProjectName,
-    createProjectSlug,
+    createProjectRoomId,
+    createProjectNameError,
+    canCreateProject,
     isLoading,
+    errorMessage,
     closeDialog,
     setCreateProjectName,
     createProject,
@@ -62,13 +65,18 @@ function CreateProjectDialog({ controller }: ProjectDialogsProps) {
       description="Start a new architecture workspace."
       footer={
         <>
-          <Button type="button" variant="outline" onClick={closeDialog}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeDialog}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button
             type="submit"
             form="create-project-form"
-            disabled={createProjectName.trim().length === 0 || isLoading}
+            disabled={!canCreateProject || isLoading}
           >
             {isLoading ? "Creating..." : "Create Project"}
           </Button>
@@ -94,12 +102,14 @@ function CreateProjectDialog({ controller }: ProjectDialogsProps) {
 
         <div className="rounded-xl border border-surface-border bg-subtle px-3 py-2">
           <p className="text-xs font-medium uppercase text-copy-faint">
-            Slug preview
+            Room ID preview
           </p>
           <p className="mt-1 font-mono text-sm text-brand">
-            /{createProjectSlug}
+            {createProjectRoomId ? `/${createProjectRoomId}` : "No room ID"}
           </p>
         </div>
+
+        <ProjectDialogError message={createProjectNameError ?? errorMessage} />
       </form>
     </EditorDialogContent>
   )
@@ -110,6 +120,7 @@ function RenameProjectDialog({ controller }: ProjectDialogsProps) {
     activeDialog,
     renameProjectName,
     isLoading,
+    errorMessage,
     closeDialog,
     setRenameProjectName,
     renameProject,
@@ -136,7 +147,12 @@ function RenameProjectDialog({ controller }: ProjectDialogsProps) {
       }
       footer={
         <>
-          <Button type="button" variant="outline" onClick={closeDialog}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeDialog}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button
@@ -163,13 +179,15 @@ function RenameProjectDialog({ controller }: ProjectDialogsProps) {
           className={projectNameInputClassName}
           autoFocus
         />
+        <ProjectDialogError message={errorMessage} />
       </form>
     </EditorDialogContent>
   )
 }
 
 function DeleteProjectDialog({ controller }: ProjectDialogsProps) {
-  const { activeDialog, isLoading, closeDialog, deleteProject } = controller
+  const { activeDialog, isLoading, errorMessage, closeDialog, deleteProject } =
+    controller
   const project = activeDialog?.project
 
   if (!project) {
@@ -182,7 +200,12 @@ function DeleteProjectDialog({ controller }: ProjectDialogsProps) {
       description="This action cannot be undone."
       footer={
         <>
-          <Button type="button" variant="outline" onClick={closeDialog}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeDialog}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button
@@ -200,6 +223,19 @@ function DeleteProjectDialog({ controller }: ProjectDialogsProps) {
         Delete{" "}
         <span className="font-medium text-copy-primary">{project.name}</span>?
       </p>
+      <ProjectDialogError message={errorMessage} />
     </EditorDialogContent>
+  )
+}
+
+function ProjectDialogError({ message }: { message: string | null }) {
+  if (!message) {
+    return null
+  }
+
+  return (
+    <p role="alert" className="text-sm text-error">
+      {message}
+    </p>
   )
 }

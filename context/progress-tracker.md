@@ -12,6 +12,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Project API review follow-up fixes and current user-settings contrast cleanup.
+- Create-project room ID validation from `context/current-issues.md`.
+- Editor home real project API wiring from `context/feature-specs/07-wire-editor-home.md`.
+- Backend project API routes from `context/feature-specs/06-project-apis.md`.
+- Prisma schema and data layer from `context/feature-specs/05-prisma.md`.
 - Project dialog follow-up fixes from current review findings.
 - Current visual issue cleanup from `context/current-issues.md`.
 - Project dialogs and editor home from `context/feature-specs/04-project-dialogs.md`.
@@ -40,10 +45,39 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Architecture Decisions
 
+- `/api/projects` remains handler-protected instead of middleware-blocked so unauthenticated API requests return JSON `401` responses.
 - Allow local development and devtunnel origins for Next Server Actions in development so Clerk sign-out does not fail host/origin validation.
 
 ## Session Notes
 
+- Completed project API review follow-up fixes and current user-settings contrast cleanup.
+- Folded project owner checks into `PATCH` and `DELETE` mutations, mapped missing or forbidden write results back to `404` or `403`, and mapped duplicate project ID create races to the existing `409` response.
+- Normalized collaborator email access checks, moved collaborator email storage to `CITEXT` with lowercase enforcement, and replaced the project created-at index with the owner plus `updatedAt DESC` listing index.
+- Guarded create, rename, and delete project dialog completions against dismissed or replaced dialogs, disabled dismiss buttons while loading, and reset the project sidebar tab from the active shared project state.
+- Fixed Clerk user settings badge contrast for "This device" and "Primary", and corrected the sidebar wording in `context/current-issues.md` while leaving the default-sidebar setting open.
+- Verified with `DOTENV_CONFIG_PATH=.env.local npx prisma format`, `DOTENV_CONFIG_PATH=.env.local npx prisma validate`, `DOTENV_CONFIG_PATH=.env.local npx prisma generate`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `git diff --check`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Completed create-project room ID validation from `context/current-issues.md`.
+- Updated the create-project flow so non-sluggable names such as `!!` do not generate a fallback room ID, disable submission, and show a validation message.
+- Verified with `npx tsc --noEmit`, `npm run build`, and `npm run lint`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Completed editor home real project API wiring from `context/feature-specs/07-wire-editor-home.md`.
+- Added server-side owned/shared project list loading for `/editor` and `/editor/[projectId]`, with sidebar data derived from the real project records.
+- Added `hooks/use-project-actions.ts` for create, rename, and delete dialog state plus API-backed mutations.
+- Create now generates a slug-plus-suffix room ID, submits it as the project ID, and navigates to `/editor/[projectId]` so the project ID and Liveblocks room ID stay aligned.
+- Rename refreshes the current route after a successful `PATCH`, and delete redirects to `/editor` when deleting the active workspace or refreshes otherwise.
+- Added a minimal `/editor/[projectId]` workspace target and real project sidebar links.
+- Verified with `npx tsc --noEmit`, `npm run build`, and `npm run lint`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started implementation of `context/feature-specs/07-wire-editor-home.md`.
+- Completed backend project API routes from `context/feature-specs/06-project-apis.md`.
+- Added `GET` and `POST` handlers at `/api/projects` for owner-scoped project listing and creation with Clerk `userId` stored as `ownerId`.
+- Added `PATCH` and `DELETE` handlers at `/api/projects/[projectId]` with owner checks returning `403` for authenticated non-owners.
+- Added shared project API helpers for auth checks, body parsing, project-name validation/defaulting, consistent JSON errors, and project response serialization.
+- Allowed `/api/projects` through Clerk middleware while keeping handler-level auth checks so unauthenticated API requests return JSON `401` responses.
+- Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, and unauthenticated `curl` checks for `GET`, `POST`, `PATCH`, and `DELETE`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Completed Prisma schema and data layer from `context/feature-specs/05-prisma.md`.
+- Added `Project` and `ProjectCollaborator` Prisma models, created migration `20260627141010_add_project_data_layer`, and generated the Prisma client into the ignored `app/generated/prisma` output.
+- Added a server-only cached Prisma singleton in `lib/prisma.ts` that uses `accelerateUrl` for `prisma+postgres://` URLs and `@prisma/adapter-pg` for direct PostgreSQL URLs.
+- Verified with `DOTENV_CONFIG_PATH=.env.local npx prisma validate`, `DOTENV_CONFIG_PATH=.env.local npx prisma migrate dev --name add_project_data_layer`, `DOTENV_CONFIG_PATH=.env.local npx prisma generate`, `npm run build`, and `npm run lint`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started implementation of `context/feature-specs/05-prisma.md`.
 - Completed project dialog follow-up fixes from current review findings.
 - Reconciled `context/current-issues.md` with `context/progress-tracker.md` so resolved visual cleanup items are no longer listed as open.
 - Aligned project create slug preview and saved slug fallback, and updated rename to keep project name and slug in sync.

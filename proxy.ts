@@ -5,6 +5,7 @@ import { signInPath, signInUrl, signUpPath, signUpUrl } from "@/lib/auth-routes"
 const isPublicRoute = createRouteMatcher([
   `${signInPath}(.*)`,
   `${signUpPath}(.*)`,
+  "/api/projects(.*)",
 ])
 
 export default clerkMiddleware(
