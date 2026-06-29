@@ -25,3 +25,19 @@ export interface ProjectSidebarLists {
   ownedProjects: ProjectSidebarItem[]
   sharedProjects: ProjectSidebarItem[]
 }
+
+export interface ProjectCollaboratorResource {
+  email: string
+  displayName: string | null
+  avatarUrl: string | null
+  createdAt: string
+}
+
+export interface ProjectCollaboratorsResponse {
+  collaborators: ProjectCollaboratorResource[]
+  canManage: boolean
+}
+
+export interface ProjectCollaboratorResponse {
+  collaborator: ProjectCollaboratorResource
+}
