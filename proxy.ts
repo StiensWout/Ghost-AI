@@ -7,10 +7,11 @@ const isPublicRoute = createRouteMatcher([
   `${signUpPath}(.*)`,
   "/api/projects(.*)",
 ])
+const isWorkspaceRoute = createRouteMatcher(["/editor/(.*)"])
 
 export default clerkMiddleware(
   async (auth, request) => {
-    if (!isPublicRoute(request)) {
+    if (!isPublicRoute(request) && !isWorkspaceRoute(request)) {
       await auth.protect()
     }
   },

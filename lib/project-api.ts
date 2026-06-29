@@ -215,11 +215,27 @@ export function readRequiredProjectName(body: Record<string, unknown>) {
   return name
 }
 
+export function readRequiredCollaboratorEmail(body: Record<string, unknown>) {
+  const rawEmail = body.email
+
+  if (typeof rawEmail !== "string") {
+    return null
+  }
+
+  const email = normalizeCollaboratorEmail(rawEmail)
+
+  if (!isValidEmail(email)) {
+    return null
+  }
+
+  return email
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-function serializeProjectSidebarItem(
+export function serializeProjectSidebarItem(
   project: SelectedProject,
   access: ProjectAccess
 ): ProjectSidebarItem {
@@ -269,5 +285,12 @@ function isValidProjectId(id: string) {
     id.length >= 3 &&
     id.length <= 96 &&
     /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)
+  )
+}
+
+function isValidEmail(email: string) {
+  return (
+    email.length <= 254 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   )
 }

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -8,6 +7,7 @@ import { EditorNavbar } from "@/components/editor/editor-navbar"
 import { ProjectDialogs } from "@/components/editor/project-dialogs"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
 import { useProjectActions } from "@/hooks/use-project-actions"
+import { useSidebarPreference } from "@/hooks/use-sidebar-preference"
 import type { ProjectSidebarItem } from "@/types/projects"
 
 interface EditorLayoutPreviewProps {
@@ -21,7 +21,12 @@ export function EditorLayoutPreview({
   ownedProjects,
   sharedProjects,
 }: EditorLayoutPreviewProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const {
+    isSidebarOpen,
+    isSidebarOpenByDefault,
+    setIsSidebarOpen,
+    updateSidebarDefaultOpen,
+  } = useSidebarPreference({ defaultOpen: true })
   const projectActions = useProjectActions({ activeProjectId })
   const activeProject = [...ownedProjects, ...sharedProjects].find(
     (project) => project.id === activeProjectId
@@ -32,6 +37,8 @@ export function EditorLayoutPreview({
       <EditorNavbar
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((current) => !current)}
+        isSidebarOpenByDefault={isSidebarOpenByDefault}
+        onSidebarOpenByDefaultChange={updateSidebarDefaultOpen}
       />
 
       <ProjectSidebar

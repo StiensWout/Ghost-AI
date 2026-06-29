@@ -21,3 +21,23 @@ function toRoutePath(routeUrl: string) {
 
 export const signInPath = toRoutePath(signInUrl)
 export const signUpPath = toRoutePath(signUpUrl)
+
+export function appendRedirectUrl(routePath: string, redirectUrl: string) {
+  const params = new URLSearchParams({
+    redirect_url: redirectUrl,
+  })
+
+  return `${routePath}?${params.toString()}`
+}
+
+export function readInternalRedirectUrl(value: string | string[] | undefined) {
+  if (Array.isArray(value) || typeof value !== "string") {
+    return null
+  }
+
+  if (!value.startsWith("/") || value.startsWith("//")) {
+    return null
+  }
+
+  return value
+}
