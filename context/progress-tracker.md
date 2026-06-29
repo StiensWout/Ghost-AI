@@ -12,6 +12,12 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Sidebar preference hydration mismatch fix.
+- Sidebar default setting moved into Clerk user settings.
+- Email-based project sharing access.
+- Workspace shell issue cleanup from `context/current-issues.md`.
+- Editor workspace shell from `context/feature-specs/08-editor-workspace-shell.md`.
+- Current issue verification cleanup for already-resolved project review findings.
 - Project API review follow-up fixes and current user-settings contrast cleanup.
 - Create-project room ID validation from `context/current-issues.md`.
 - Editor home real project API wiring from `context/feature-specs/07-wire-editor-home.md`.
@@ -50,6 +56,36 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Fixed the sidebar preference hydration mismatch by making `useSidebarPreference` render the same fallback state during SSR and the browser's initial render, then applying localStorage/sessionStorage preferences after mount.
+- Verified the hydration fix with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, signed-out HTTP checks for `/editor` and `/sign-in`, and a post-patch dev-server browser log tail with no new hydration error; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Moved the local project sidebar default-open setting out of the project sidebar footer and into a custom Workspace page inside Clerk's `UserButton` user settings.
+- Kept sidebar preference persistence local to the existing `useSidebarPreference` localStorage flow; no account-synced settings, sharing revoke logic, or new server persistence was added.
+- Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, and signed-out HTTP checks for `/editor` and `/sign-in`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`, and T3 preview snapshot timed out at the automation layer.
+- Completed email-based project sharing access.
+- Added an owner-only collaborator share endpoint at `/api/projects/[projectId]/collaborators` that grants access by normalized email without adding share settings, collaborator listing, or revoke behavior.
+- Replaced the workspace share action with an email dialog that grants access and exposes/copies the workspace link.
+- Preserved shared workspace return URLs through local Clerk sign-in and sign-up so invited users can create an account and land on the shared project when their primary email matches the collaborator email.
+- Updated the access denied screen to tell signed-in users they lack access and route them to create their own project.
+- Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, an unauthenticated collaborator API `401` check, and a signed-out shared workspace redirect check; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`, and T3 preview navigation failed at the automation layer.
+- Started email-based project sharing access.
+- Completed workspace shell issue cleanup from `context/current-issues.md`.
+- Matched the AI chat sidebar to the floating project sidebar style and added a close button plus mobile scrim.
+- Added a local project sidebar default-open setting, and collapse-on-project-open behavior for sidebar links and project creation.
+- Initially enabled the Share action as link copy only; this was superseded by email-based collaborator sharing without share settings or revoke behavior.
+- Normalized direct Postgres `sslmode=prefer`, `require`, and `verify-ca` values to `verify-full` before initializing the Prisma PG adapter.
+- Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `git diff --check`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`, and T3 preview automation timed out before browser UI smoke testing.
+- Started workspace shell issue cleanup from `context/current-issues.md`.
+- Completed editor workspace shell from `context/feature-specs/08-editor-workspace-shell.md`.
+- Added `lib/project-access.ts` for current Clerk identity lookup and owner-or-collaborator project access checks.
+- Added `AccessDenied` for missing or unauthorized workspaces, and changed `/editor/[roomId]` to redirect signed-out users to `/sign-in` before loading project access.
+- Added a workspace shell with project title in the navbar, disabled share action, AI sidebar toggle, highlighted active room in the existing project sidebar, canvas placeholder, and AI sidebar placeholder.
+- Adjusted proxy matching so `/editor/[roomId]` is handled by the server page access checks while `/editor` keeps the existing middleware protection.
+- Verified with `npx next typegen`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, and signed-out HTTP checks for `/editor` and `/editor/non-existent-room`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started implementation of `context/feature-specs/08-editor-workspace-shell.md`.
+- Completed current issue verification cleanup for already-resolved project review findings.
+- Verified the pasted project API, Prisma, dialog, and sidebar findings against current code; each item was already addressed in the existing implementation, so no code changes were needed.
+- Restored `context/current-issues.md` to the real open sidebar-default setting and moved the stale pasted review list into a concise resolved verification note.
+- Verified with `DOTENV_CONFIG_PATH=.env.local npx prisma validate`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `git diff --check`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
 - Completed project API review follow-up fixes and current user-settings contrast cleanup.
 - Folded project owner checks into `PATCH` and `DELETE` mutations, mapped missing or forbidden write results back to `404` or `403`, and mapped duplicate project ID create races to the existing `409` response.
 - Normalized collaborator email access checks, moved collaborator email storage to `CITEXT` with lowercase enforcement, and replaced the project created-at index with the owner plus `updatedAt DESC` listing index.

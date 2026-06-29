@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
+import { collapseSidebarAfterProjectOpen } from "@/hooks/use-sidebar-preference"
 import type { ProjectSidebarItem } from "@/types/projects"
 
 export type ProjectDialogType = "create" | "rename" | "delete"
@@ -138,6 +139,7 @@ export function useProjectActions({
       }
 
       closeDialog()
+      collapseSidebarAfterProjectOpen()
       router.push(getProjectWorkspacePath(project.id))
     } catch (error) {
       if (!isActiveRequest(requestId, "create")) {

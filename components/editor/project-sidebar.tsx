@@ -6,6 +6,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { collapseSidebarAfterProjectOpen } from "@/hooks/use-sidebar-preference"
 import { getProjectWorkspacePath } from "@/hooks/use-project-actions"
 import { cn } from "@/lib/utils"
 import type { ProjectSidebarItem } from "@/types/projects"
@@ -72,7 +73,10 @@ function ProjectList({
               href={getProjectWorkspacePath(project.id)}
               aria-current={isActive ? "page" : undefined}
               className="min-w-0 flex-1 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              onClick={onClose}
+              onClick={() => {
+                collapseSidebarAfterProjectOpen()
+                onClose?.()
+              }}
             >
               <p className="truncate text-sm font-medium text-copy-primary">
                 {project.name}

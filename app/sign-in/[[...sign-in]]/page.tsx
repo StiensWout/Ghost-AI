@@ -2,9 +2,29 @@ import { SignIn } from "@clerk/nextjs"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { authAppearance } from "@/lib/clerk-appearance"
-import { editorUrl, signInPath, signUpUrl } from "@/lib/auth-routes"
+import {
+  appendRedirectUrl,
+  editorUrl,
+  readInternalRedirectUrl,
+  signInPath,
+  signUpPath,
+  signUpUrl,
+} from "@/lib/auth-routes"
 
-export default function SignInPage() {
+interface SignInPageProps {
+  searchParams: Promise<{
+    redirect_url?: string | string[]
+  }>
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { redirect_url } = await searchParams
+  const redirectUrl = readInternalRedirectUrl(redirect_url)
+  const fallbackRedirectUrl = redirectUrl ?? editorUrl
+  const preservedSignUpUrl = redirectUrl
+    ? appendRedirectUrl(signUpPath, redirectUrl)
+    : signUpUrl
+
   return (
     <AuthShell
       eyebrow="System design workspace"
@@ -12,10 +32,11 @@ export default function SignInPage() {
     >
       <SignIn
         appearance={authAppearance}
-        fallbackRedirectUrl={editorUrl}
+        fallbackRedirectUrl={fallbackRedirectUrl}
         path={signInPath}
         routing="path"
-        signUpUrl={signUpUrl}
+        signUpFallbackRedirectUrl={fallbackRedirectUrl}
+        signUpUrl={preservedSignUpUrl}
       />
     </AuthShell>
   )

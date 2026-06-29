@@ -1,20 +1,32 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { UserButton } from "@clerk/nextjs"
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { PanelLeft, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { SidebarPreferenceSettings } from "@/components/editor/sidebar-preference-settings"
 import { cn } from "@/lib/utils"
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean
   onToggleSidebar: () => void
+  isSidebarOpenByDefault: boolean
+  onSidebarOpenByDefaultChange: (isOpenByDefault: boolean) => void
+  title?: string
+  subtitle?: string
+  actions?: ReactNode
   className?: string
 }
 
 export function EditorNavbar({
   isSidebarOpen,
   onToggleSidebar,
+  isSidebarOpenByDefault,
+  onSidebarOpenByDefaultChange,
+  title,
+  subtitle,
+  actions,
   className,
 }: EditorNavbarProps) {
   const SidebarIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen
@@ -38,9 +50,34 @@ export function EditorNavbar({
           <SidebarIcon className="h-5 w-5" />
         </Button>
       </div>
-      <div className="min-w-0" />
-      <div className="ml-auto flex min-w-fit items-center justify-end justify-self-end">
-        <UserButton />
+      <div className="min-w-0 px-3">
+        {title ? (
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-copy-primary">
+              {title}
+            </p>
+            {subtitle ? (
+              <p className="truncate font-mono text-xs text-copy-muted">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+      <div className="ml-auto flex min-w-fit items-center justify-end gap-2 justify-self-end">
+        {actions}
+        <UserButton>
+          <UserButton.UserProfilePage
+            label="Workspace"
+            url="workspace"
+            labelIcon={<PanelLeft className="h-4 w-4" />}
+          >
+            <SidebarPreferenceSettings
+              isOpenByDefault={isSidebarOpenByDefault}
+              onOpenByDefaultChange={onSidebarOpenByDefaultChange}
+            />
+          </UserButton.UserProfilePage>
+        </UserButton>
       </div>
     </header>
   )
