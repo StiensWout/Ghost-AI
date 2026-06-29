@@ -1,6 +1,7 @@
 import "server-only"
 
-import { Liveblocks } from "@liveblocks/node"
+import { Liveblocks, LiveblocksError } from "@liveblocks/node"
+import type { RoomPermissions } from "@liveblocks/node"
 
 export const LIVEBLOCKS_CURSOR_COLORS = [
   "#00c8d4",
@@ -12,6 +13,8 @@ export const LIVEBLOCKS_CURSOR_COLORS = [
   "#0ac7b4",
   "#ff990a",
 ] as const
+
+const liveblocksRoomWriteAccess: RoomPermissions = ["*:write"]
 
 type LiveblocksGlobal = typeof globalThis & {
   liveblocksClient?: Liveblocks
@@ -33,6 +36,57 @@ export function getLiveblocksClient() {
   }
 
   return globalForLiveblocks.liveblocksClient
+}
+
+export async function grantLiveblocksRoomWriteAccess({
+  roomId,
+  userId,
+}: {
+  roomId: string
+  userId: string
+}) {
+  await getLiveblocksClient().upsertRoom(roomId, {
+    update: {
+      defaultAccesses: [],
+      usersAccesses: {
+        [userId]: liveblocksRoomWriteAccess,
+      },
+    },
+    create: {
+      defaultAccesses: [],
+      usersAccesses: {
+        [userId]: liveblocksRoomWriteAccess,
+      },
+    },
+  })
+}
+
+export async function revokeLiveblocksRoomAccess({
+  roomId,
+  userIds,
+}: {
+  roomId: string
+  userIds: string[]
+}) {
+  const uniqueUserIds = Array.from(new Set(userIds))
+
+  if (uniqueUserIds.length === 0) {
+    return
+  }
+
+  try {
+    await getLiveblocksClient().updateRoom(roomId, {
+      usersAccesses: Object.fromEntries(
+        uniqueUserIds.map((userId) => [userId, null])
+      ),
+    })
+  } catch (error) {
+    if (error instanceof LiveblocksError && error.status === 404) {
+      return
+    }
+
+    throw error
+  }
 }
 
 export function getLiveblocksCursorColor(userId: string) {

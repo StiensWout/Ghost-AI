@@ -8,6 +8,7 @@ import {
   ConnectionMode,
   Handle,
   MiniMap,
+  Panel,
   Position,
   ReactFlow,
   type NodeProps,
@@ -123,7 +124,7 @@ const canvasHandlePositions: Array<{
 export function BaseCanvas() {
   const reactFlowInstanceRef =
     useRef<ReactFlowInstance<CanvasNode, CanvasEdge> | null>(null)
-  const nodeCounterRef = useRef(0)
+  const canvasElementRef = useRef<HTMLDivElement | null>(null)
   const shapeDragPayloadRef = useRef<ShapeDragPayload | null>(null)
   const [shapeDragPreview, setShapeDragPreview] =
     useState<ShapeDragPreviewState | null>(null)
@@ -149,6 +150,35 @@ export function BaseCanvas() {
       reactFlowInstanceRef.current = reactFlowInstance
     },
     []
+  )
+
+  const addShapeNode = useCallback(
+    (
+      payload: ShapeDragPayload,
+      centerPosition: {
+        x: number
+        y: number
+      }
+    ) => {
+      const newNode: CanvasNode = {
+        id: createCanvasNodeId(),
+        type: CANVAS_NODE_TYPE,
+        position: {
+          x: centerPosition.x - payload.width / 2,
+          y: centerPosition.y - payload.height / 2,
+        },
+        width: payload.width,
+        height: payload.height,
+        data: {
+          label: "",
+          color: defaultNodeColor.id,
+          shape: payload.shape,
+        },
+      }
+
+      onNodesChange([{ type: "add", item: newNode }])
+    },
+    [onNodesChange]
   )
 
   const handleShapeDragStart = useCallback(
@@ -221,27 +251,15 @@ export function BaseCanvas() {
         return
       }
 
-      nodeCounterRef.current += 1
-
-      const newNode: CanvasNode = {
-        id: `${payload.shape}-${Date.now()}-${nodeCounterRef.current}`,
-        type: CANVAS_NODE_TYPE,
-        position: reactFlowInstance.screenToFlowPosition({
+      addShapeNode(
+        payload,
+        reactFlowInstance.screenToFlowPosition({
           x: event.clientX,
           y: event.clientY,
-        }),
-        width: payload.width,
-        height: payload.height,
-        data: {
-          label: "",
-          color: defaultNodeColor.id,
-          shape: payload.shape,
-        },
-      }
-
-      onNodesChange([{ type: "add", item: newNode }])
+        })
+      )
     },
-    [onNodesChange]
+    [addShapeNode]
   )
 
   const clearShapeDragPreview = useCallback(() => {
@@ -249,44 +267,74 @@ export function BaseCanvas() {
     shapeDragPayloadRef.current = null
   }, [])
 
+  const handleShapeAdd = useCallback(
+    (shapeOption: ShapeOption) => {
+      const reactFlowInstance = reactFlowInstanceRef.current
+      const canvasBounds = canvasElementRef.current?.getBoundingClientRect()
+
+      if (!reactFlowInstance || !canvasBounds) {
+        return
+      }
+
+      addShapeNode(
+        {
+          shape: shapeOption.shape,
+          width: shapeOption.width,
+          height: shapeOption.height,
+        },
+        reactFlowInstance.screenToFlowPosition({
+          x: canvasBounds.left + canvasBounds.width / 2,
+          y: canvasBounds.top + canvasBounds.height / 2,
+        })
+      )
+    },
+    [addShapeNode]
+  )
+
   return (
-    <ReactFlow<CanvasNode, CanvasEdge>
-      className="h-full w-full bg-base text-copy-primary [&_.react-flow__pane]:cursor-grab [&_.react-flow__pane:active]:cursor-grabbing"
-      colorMode="dark"
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onDelete={onDelete}
-      onInit={handleReactFlowInit}
-      onDragOver={handleCanvasDragOver}
-      onDragLeave={handleCanvasDragLeave}
-      onDrop={handleCanvasDrop}
-      nodeTypes={nodeTypes}
-      connectionMode={ConnectionMode.Loose}
-      connectionRadius={32}
-      fitViewOptions={{
-        maxZoom: 1,
-        padding: 0.24,
-      }}
-      fitView
-      proOptions={{
-        hideAttribution: true,
-      }}
-    >
-      <Background
-        variant={BackgroundVariant.Dots}
-        gap={18}
-        size={1}
-        color="var(--border-default)"
-      />
-      <div className="pointer-events-auto absolute bottom-5 right-5 z-20 h-34 w-56 overflow-hidden rounded-xl border border-surface-border bg-base shadow-2xl [&_.react-flow__panel]:!static [&_.react-flow__panel]:!m-0 [&_.react-flow__panel]:!transform-none">
+    <div ref={canvasElementRef} className="h-full w-full">
+      <ReactFlow<CanvasNode, CanvasEdge>
+        className="h-full w-full bg-base text-copy-primary [&_.react-flow__pane]:cursor-grab [&_.react-flow__pane:active]:cursor-grabbing"
+        colorMode="dark"
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDelete={onDelete}
+        onInit={handleReactFlowInit}
+        onDragOver={handleCanvasDragOver}
+        onDragLeave={handleCanvasDragLeave}
+        onDrop={handleCanvasDrop}
+        nodeTypes={nodeTypes}
+        connectionMode={ConnectionMode.Loose}
+        connectionRadius={32}
+        fitViewOptions={{
+          maxZoom: 1,
+          padding: 0.24,
+        }}
+        fitView
+        proOptions={{
+          hideAttribution: true,
+        }}
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={18}
+          size={1}
+          color="var(--border-default)"
+        />
         <MiniMap
           pannable
           zoomable
-          position="top-left"
-          className="h-full w-full bg-base"
+          position="bottom-right"
+          className="!m-0 overflow-hidden rounded-xl border border-surface-border bg-base shadow-2xl"
+          style={{
+            bottom: 20,
+            right: 20,
+            width: 224,
+            height: 136,
+          }}
           bgColor="var(--bg-surface)"
           maskColor="color-mix(in srgb, var(--bg-base) 72%, transparent)"
           maskStrokeColor="var(--border-subtle)"
@@ -295,20 +343,29 @@ export function BaseCanvas() {
           nodeStrokeColor="var(--border-subtle)"
           nodeBorderRadius={6}
         />
-      </div>
-      <div className="pointer-events-none absolute bottom-5 left-1/2 z-30 -translate-x-1/2">
-        <ShapePanel
-          onShapeDragStart={handleShapeDragStart}
-          onShapeDragEnd={clearShapeDragPreview}
-        />
-      </div>
-      <ShapeDragPreview preview={shapeDragPreview} />
-      <Cursors />
-    </ReactFlow>
+        <Panel
+          position="bottom-center"
+          className="pointer-events-none z-30 !m-0"
+          style={{
+            bottom: 20,
+            transform: "translateX(-50%)",
+          }}
+        >
+          <ShapePanel
+            onShapeAdd={handleShapeAdd}
+            onShapeDragStart={handleShapeDragStart}
+            onShapeDragEnd={clearShapeDragPreview}
+          />
+        </Panel>
+        <ShapeDragPreview preview={shapeDragPreview} />
+        <Cursors />
+      </ReactFlow>
+    </div>
   )
 }
 
 interface ShapePanelProps {
+  onShapeAdd: (shapeOption: ShapeOption) => void
   onShapeDragStart: (
     event: DragEvent<HTMLButtonElement>,
     shapeOption: ShapeOption
@@ -316,7 +373,11 @@ interface ShapePanelProps {
   onShapeDragEnd: () => void
 }
 
-function ShapePanel({ onShapeDragEnd, onShapeDragStart }: ShapePanelProps) {
+function ShapePanel({
+  onShapeAdd,
+  onShapeDragEnd,
+  onShapeDragStart,
+}: ShapePanelProps) {
   return (
     <div className="nodrag nopan pointer-events-auto flex h-16 w-max items-center gap-3 rounded-full border border-surface-border-subtle bg-base/85 px-5 shadow-2xl backdrop-blur-xl">
       {shapeOptions.map((shapeOption) => {
@@ -330,6 +391,7 @@ function ShapePanel({ onShapeDragEnd, onShapeDragStart }: ShapePanelProps) {
             aria-label={`Add ${shapeOption.label} node`}
             title={shapeOption.label}
             className="flex size-8 items-center justify-center rounded-xl border border-transparent text-copy-muted transition-colors hover:border-surface-border-subtle hover:bg-subtle hover:text-copy-primary focus-visible:border-brand focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand/30"
+            onClick={() => onShapeAdd(shapeOption)}
             onDragStart={(event) => onShapeDragStart(event, shapeOption)}
             onDragEnd={onShapeDragEnd}
           >
@@ -444,6 +506,10 @@ function getShapeOption(shape: NodeShape) {
     shapeOptions.find((shapeOption) => shapeOption.shape === shape) ??
     shapeOptions[0]
   )
+}
+
+function createCanvasNodeId() {
+  return `node-${crypto.randomUUID()}`
 }
 
 function readShapeDragPayload(dataTransfer: DataTransfer) {

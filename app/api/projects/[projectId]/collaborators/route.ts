@@ -1,6 +1,10 @@
 import prisma from "@/lib/prisma"
-import { serializeProjectCollaborators } from "@/lib/project-collaborators"
+import {
+  getClerkUserIdsByEmail,
+  serializeProjectCollaborators,
+} from "@/lib/project-collaborators"
 import { getCurrentProjectIdentity } from "@/lib/project-access"
+import { revokeLiveblocksRoomAccess } from "@/lib/liveblocks"
 import {
   jsonError,
   normalizeCollaboratorEmail,
@@ -144,10 +148,43 @@ export async function DELETE(
     return ownerAccess.response
   }
 
+  const collaborator = await prisma.projectCollaborator.findUnique({
+    where: {
+      projectId_email: {
+        projectId,
+        email,
+      },
+    },
+    select: {
+      email: true,
+    },
+  })
+
+  if (!collaborator) {
+    return jsonError("Collaborator not found", 404)
+  }
+
+  let revokedUserIds: string[]
+
+  try {
+    revokedUserIds = await getClerkUserIdsByEmail(collaborator.email)
+  } catch {
+    return jsonError("Unable to resolve collaborator access", 503)
+  }
+
+  try {
+    await revokeLiveblocksRoomAccess({
+      roomId: projectId,
+      userIds: revokedUserIds,
+    })
+  } catch {
+    return jsonError("Unable to revoke collaborator room access", 502)
+  }
+
   const deleteResult = await prisma.projectCollaborator.deleteMany({
     where: {
       projectId,
-      email,
+      email: collaborator.email,
     },
   })
 

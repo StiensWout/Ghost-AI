@@ -5,6 +5,7 @@ import {
   getProjectAccessByOwnerOrCollaborator,
 } from "@/lib/project-access"
 import {
+  grantLiveblocksRoomWriteAccess,
   getLiveblocksClient,
   getLiveblocksCursorColor,
 } from "@/lib/liveblocks"
@@ -40,29 +41,29 @@ export async function POST(request: Request) {
 
   const liveblocks = getLiveblocksClient()
 
-  await liveblocks.getOrCreateRoom(roomId, {
-    defaultAccesses: [],
+  await grantLiveblocksRoomWriteAccess({
+    roomId,
+    userId: identity.userId,
   })
 
   const user = await currentUser()
   const color = getLiveblocksCursorColor(identity.userId)
-  const session = liveblocks.prepareSession(identity.userId, {
-    userInfo: {
-      name: getDisplayName({
-        fullName: user?.fullName ?? null,
-        firstName: user?.firstName ?? null,
-        username: user?.username ?? null,
-        primaryEmail: identity.primaryEmail,
-        userId: identity.userId,
-      }),
-      avatar: user?.imageUrl ?? "",
-      color,
-    },
-  })
-
-  session.allow(roomId, ["room:write"])
-
-  const { body: responseBody, status } = await session.authorize()
+  const { body: responseBody, status } = await liveblocks.identifyUser(
+    identity.userId,
+    {
+      userInfo: {
+        name: getDisplayName({
+          fullName: user?.fullName ?? null,
+          firstName: user?.firstName ?? null,
+          username: user?.username ?? null,
+          primaryEmail: identity.primaryEmail,
+          userId: identity.userId,
+        }),
+        avatar: user?.imageUrl ?? "",
+        color,
+      },
+    }
+  )
 
   return new Response(responseBody, { status })
 }

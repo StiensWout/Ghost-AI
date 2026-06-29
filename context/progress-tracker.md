@@ -12,6 +12,8 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Canvas toolbar placement and pane panning regression fix.
+- Current issue cleanup for canvas shape insertion and Liveblocks room access revocation.
 - Shape drag-and-drop regression fix on the editor canvas.
 - Canvas connection handle and shape drag preview issue fixes from `context/current-issues.md`.
 - Liveblocks-style editor canvas visual polish from the provided screenshot.
@@ -60,9 +62,16 @@ Update this file whenever the current phase, active feature, or implementation s
 
 - `/api/projects` remains handler-protected instead of middleware-blocked so unauthenticated API requests return JSON `401` responses.
 - Allow local development and devtunnel origins for Next Server Actions in development so Clerk sign-out does not fail host/origin validation.
+- Liveblocks canvas auth uses app-verified project membership, private room permissions, and `identifyUser` ID tokens; collaborator removal revokes matching room user permissions before deleting the collaborator row.
 
 ## Session Notes
 
+- Completed canvas toolbar placement and pane panning regression fix.
+- Replaced the first overlay fix with React Flow `Panel` placement for the shape toolbar and minimap so React Flow keeps its own internal provider, blank-canvas panning remains wired to the pane, and the toolbar is still anchored at the bottom center.
+- Completed current issue cleanup for canvas shape insertion and Liveblocks room access revocation from `context/current-issues.md`.
+- Shared shape insertion now centers dropped nodes under the pointer, adds click and keyboard insertion at the viewport center, and generates canvas node IDs with `crypto.randomUUID()`.
+- Liveblocks auth now grants app-verified users room write access and issues ID tokens through `identifyUser`; collaborator removal resolves the removed email to Clerk user IDs and revokes those room permissions before deleting the collaborator row.
+- Started current issue cleanup for canvas shape insertion and Liveblocks room access revocation from `context/current-issues.md`.
 - Completed shape drag-and-drop regression fix on the editor canvas.
 - Fixed the canvas `dragover` gate so it checks the custom drag MIME type and calls `preventDefault()` without trying to read protected `DataTransfer` payload data before `drop`.
 - Kept the drag preview alive from the local drag-start payload and used the drop payload with a local fallback when creating nodes.

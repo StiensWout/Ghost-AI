@@ -37,6 +37,25 @@ export async function serializeProjectCollaborators(
   })
 }
 
+export async function getClerkUserIdsByEmail(email: string) {
+  const normalizedEmail = normalizeCollaboratorEmail(email)
+  const client = await clerkClient()
+  const users = await client.users.getUserList({
+    emailAddress: [normalizedEmail],
+    limit: 100,
+  })
+
+  return users.data
+    .filter((user) =>
+      user.emailAddresses.some(
+        (emailAddress) =>
+          normalizeCollaboratorEmail(emailAddress.emailAddress) ===
+          normalizedEmail
+      )
+    )
+    .map((user) => user.id)
+}
+
 async function getClerkUsersByEmail(emails: string[]) {
   const uniqueEmails = Array.from(
     new Set(emails.map((email) => normalizeCollaboratorEmail(email)))
