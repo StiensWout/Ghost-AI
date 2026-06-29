@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Bot, PanelRightClose, PanelRightOpen, X } from "lucide-react"
+import { Bot, Sparkles, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { CollaborativeCanvas } from "@/components/editor/collaborative-canvas"
 import { EditorNavbar } from "@/components/editor/editor-navbar"
 import { ProjectDialogs } from "@/components/editor/project-dialogs"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
@@ -31,9 +32,8 @@ export function EditorWorkspaceShell({
     setIsSidebarOpen: setIsProjectSidebarOpen,
     updateSidebarDefaultOpen,
   } = useSidebarPreference({ defaultOpen: false })
-  const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(true)
+  const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false)
   const projectActions = useProjectActions({ activeProjectId: currentProject.id })
-  const AiSidebarIcon = isAiSidebarOpen ? PanelRightClose : PanelRightOpen
   const workspacePath = getProjectWorkspacePath(currentProject.id)
 
   return (
@@ -58,15 +58,17 @@ export function EditorWorkspaceShell({
             <Button
               type="button"
               variant={isAiSidebarOpen ? "secondary" : "ghost"}
-              size="icon"
+              size="sm"
               aria-label={
                 isAiSidebarOpen ? "Close AI sidebar" : "Open AI sidebar"
               }
               aria-pressed={isAiSidebarOpen}
               title={isAiSidebarOpen ? "Close AI sidebar" : "Open AI sidebar"}
+              className="border border-surface-border bg-base/70 px-3 text-copy-primary hover:bg-subtle"
               onClick={() => setIsAiSidebarOpen((current) => !current)}
             >
-              <AiSidebarIcon className="h-5 w-5" />
+              <Sparkles className="h-4 w-4" />
+              <span>AI</span>
             </Button>
           </>
         }
@@ -83,23 +85,9 @@ export function EditorWorkspaceShell({
         onDeleteProject={projectActions.openDeleteDialog}
       />
 
-      <section className="relative flex min-h-0 flex-1 bg-base">
-        <div className="relative min-w-0 flex-1 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--border-default)_1px,transparent_0)] bg-[length:32px_32px] opacity-35" />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--border-default)_1px,transparent_1px),linear-gradient(45deg,var(--bg-subtle)_1px,transparent_1px)] bg-[length:18px_18px,22px_22px] opacity-10" />
-          <div className="relative flex h-full min-h-[calc(100vh-3.5rem)] items-center justify-center px-6">
-            <div className="max-w-sm rounded-2xl border border-surface-border bg-surface/80 px-6 py-5 text-center shadow-2xl backdrop-blur-xl">
-              <p className="font-mono text-xs uppercase text-brand">
-                /{currentProject.roomId}
-              </p>
-              <h1 className="mt-3 text-2xl font-semibold text-copy-primary">
-                Canvas workspace
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-copy-muted">
-                No canvas is loaded for this workspace yet.
-              </p>
-            </div>
-          </div>
+      <section className="relative flex min-h-0 flex-1 bg-base p-1.5">
+        <div className="relative min-w-0 flex-1 overflow-hidden rounded-3xl border border-surface-border bg-base shadow-2xl">
+          <CollaborativeCanvas roomId={currentProject.roomId} />
         </div>
 
         {isAiSidebarOpen ? (

@@ -4,6 +4,10 @@
 
 ## Resolved
 
+- Shape drag-and-drop now allows canvas drops during `dragover` by checking the drag MIME type instead of reading protected drag data before `drop`.
+- Canvas toolbar and minimap overlays now use app-owned absolute positioning instead of relying on React Flow panel placement, the React Flow attribution is hidden, and initial fit view is capped at 1x zoom.
+- Canvas nodes now expose stable top, right, bottom, and left connection handle IDs with start/end connectability and a larger connection radius.
+- Shape dragging now shows a canvas-positioned drop preview before the node is created.
 - Sidebar preference hydration mismatch fixed by deferring localStorage/sessionStorage reads until after mount.
 - Right AI chat sidebar now matches the floating left sidebar treatment.
 - Opening a project collapses the left sidebar for the next workspace load, including project creation.

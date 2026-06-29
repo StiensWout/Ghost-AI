@@ -34,7 +34,7 @@ export function EditorNavbar({
   return (
     <header
       className={cn(
-        "grid h-14 w-full shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center border-b border-surface-border bg-surface px-4 text-copy-primary",
+        "grid h-[60px] w-full shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center border-b border-surface-border bg-base px-4 text-copy-primary",
         className
       )}
     >
@@ -53,11 +53,11 @@ export function EditorNavbar({
       <div className="min-w-0 px-3">
         {title ? (
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-copy-primary">
+            <p className="truncate text-base font-semibold leading-5 text-copy-primary">
               {title}
             </p>
             {subtitle ? (
-              <p className="truncate font-mono text-xs text-copy-muted">
+              <p className="truncate text-sm leading-5 text-copy-faint">
                 {subtitle}
               </p>
             ) : null}
