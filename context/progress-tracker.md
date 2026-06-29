@@ -62,6 +62,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Added collaborator `GET`, `POST`, and `DELETE` route logic with server-side ownership checks and Clerk Backend API enrichment for collaborator display names and avatars.
 - Completed share dialog collaborator management from `context/feature-specs/09-share-dialog.md`.
 - Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, and an unauthenticated collaborator API `401` check; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Polished the share dialog desktop layout so it stays centered and constrained on laptop-width screens instead of stretching across the viewport.
 - Fixed the sidebar preference hydration mismatch by making `useSidebarPreference` render the same fallback state during SSR and the browser's initial render, then applying localStorage/sessionStorage preferences after mount.
 - Verified the hydration fix with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, signed-out HTTP checks for `/editor` and `/sign-in`, and a post-patch dev-server browser log tail with no new hydration error; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
 - Moved the local project sidebar default-open setting out of the project sidebar footer and into a custom Workspace page inside Clerk's `UserButton` user settings.

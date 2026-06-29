@@ -17,6 +17,7 @@ import { Dialog } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { EditorDialogContent } from "@/components/editor/editor-dialog"
+import { cn } from "@/lib/utils"
 import type {
   ProjectCollaboratorResource,
   ProjectCollaboratorResponse,
@@ -219,7 +220,7 @@ export function ShareProjectDialog({
               ? "Invite collaborators and manage workspace access."
               : "Current workspace collaborators."
           }
-          className="sm:max-w-lg"
+          className="w-[min(calc(100vw-2rem),44rem)] max-w-none sm:max-w-none"
           footer={
             <Button
               type="button"
@@ -231,9 +232,16 @@ export function ShareProjectDialog({
             </Button>
           }
         >
-          <div className="space-y-5">
+          <div
+            className={cn(
+              "grid gap-5",
+              canManage
+                ? "md:grid-cols-[minmax(0,1fr)_17rem]"
+                : "md:grid-cols-1"
+            )}
+          >
             {canManage ? (
-              <>
+              <div className="space-y-4">
                 <form className="space-y-2" onSubmit={inviteCollaborator}>
                   <label
                     htmlFor="share-project-email"
@@ -241,7 +249,7 @@ export function ShareProjectDialog({
                   >
                     Email address
                   </label>
-                  <div className="flex gap-2">
+                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                     <Input
                       id="share-project-email"
                       type="email"
@@ -273,7 +281,7 @@ export function ShareProjectDialog({
                   <p className="text-xs font-medium uppercase text-copy-faint">
                     Project link
                   </p>
-                  <div className="flex gap-2">
+                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                     <Input
                       readOnly
                       value={workspaceUrl}
@@ -299,7 +307,7 @@ export function ShareProjectDialog({
                     </Button>
                   </div>
                 </div>
-              </>
+              </div>
             ) : null}
 
             <section className="space-y-3">
