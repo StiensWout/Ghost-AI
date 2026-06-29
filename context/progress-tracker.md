@@ -12,6 +12,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Share dialog collaborator management from `context/feature-specs/09-share-dialog.md`.
 - Sidebar preference hydration mismatch fix.
 - Sidebar default setting moved into Clerk user settings.
 - Email-based project sharing access.
@@ -56,6 +57,16 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Started implementation of `context/feature-specs/09-share-dialog.md`.
+- Added share dialog collaborator management with owner-only invite, owner-only remove, read-only collaborator viewing, and project-link copy feedback.
+- Added collaborator `GET`, `POST`, and `DELETE` route logic with server-side ownership checks and Clerk Backend API enrichment for collaborator display names and avatars.
+- Completed share dialog collaborator management from `context/feature-specs/09-share-dialog.md`.
+- Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, and an unauthenticated collaborator API `401` check; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Polished the share dialog desktop layout so it stays centered and constrained on laptop-width screens instead of stretching across the viewport.
+- Adjusted the share dialog body back to three stacked sections: invite, project link, and collaborator list.
+- Capped the share dialog collaborator list with internal scrolling after four collaborators so the modal does not grow indefinitely.
+- Addressed Codex PR review feedback by making Clerk collaborator enrichment fail soft, keeping owner mutations auth-only, and serializing collaborator mutations during load/invite/remove.
+- Refined the share dialog toward the provided dark-mode reference with a wider modal, reference-style invite row, footer copy-link action, scroll-capped people list, accessible invite button labeling, and real avatar images with initials fallback.
 - Fixed the sidebar preference hydration mismatch by making `useSidebarPreference` render the same fallback state during SSR and the browser's initial render, then applying localStorage/sessionStorage preferences after mount.
 - Verified the hydration fix with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, signed-out HTTP checks for `/editor` and `/sign-in`, and a post-patch dev-server browser log tail with no new hydration error; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
 - Moved the local project sidebar default-open setting out of the project sidebar footer and into a custom Workspace page inside Clerk's `UserButton` user settings.
