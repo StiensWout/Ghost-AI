@@ -4,6 +4,15 @@
 
 ## Resolved
 
+- Canvas toolbar and minimap now use React Flow `Panel` placement so the toolbar stays bottom-centered without splitting React Flow's internal provider or blocking pane panning.
+- Dropped shapes now use the pointer as the shape center by subtracting half the shape dimensions before storing the React Flow node origin.
+- Shape toolbar buttons now insert shapes at the canvas viewport center on click or keyboard activation while keeping drag-and-drop behavior intact.
+- Canvas node IDs now use `crypto.randomUUID()` instead of shape, timestamp, and a local counter.
+- Liveblocks canvas auth now uses room-permission-backed ID tokens, and collaborator removal revokes matching Liveblocks user room access before deleting the collaborator row.
+- Shape drag-and-drop now allows canvas drops during `dragover` by checking the drag MIME type instead of reading protected drag data before `drop`.
+- Canvas toolbar and minimap placement was corrected after the controls rendered in normal flow; React Flow attribution is hidden, and initial fit view is capped at 1x zoom.
+- Canvas nodes now expose stable top, right, bottom, and left connection handle IDs with start/end connectability and a larger connection radius.
+- Shape dragging now shows a canvas-positioned drop preview before the node is created.
 - Sidebar preference hydration mismatch fixed by deferring localStorage/sessionStorage reads until after mount.
 - Right AI chat sidebar now matches the floating left sidebar treatment.
 - Opening a project collapses the left sidebar for the next workspace load, including project creation.

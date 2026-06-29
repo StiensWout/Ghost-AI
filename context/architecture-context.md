@@ -35,7 +35,9 @@
 - Projects can include additional collaborators.
 - Only authenticated users can access protected routes.
 - Only the owner or a collaborator can mutate project resources.
-- Liveblocks room tokens are issued only after verifying project membership.
+- Liveblocks room auth runs only after verifying project membership.
+- Liveblocks rooms are private by default, use user-scoped room permissions, and issue ID tokens through `identifyUser`.
+- Opening a room grants that Clerk user ID write access for the room; collaborator removal revokes matching Clerk user IDs from the room before deleting the collaborator record.
 
 ## Starter System Designs
 

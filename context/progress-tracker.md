@@ -12,6 +12,14 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Canvas toolbar placement and pane panning regression fix.
+- Current issue cleanup for canvas shape insertion and Liveblocks room access revocation.
+- Shape drag-and-drop regression fix on the editor canvas.
+- Canvas connection handle and shape drag preview issue fixes from `context/current-issues.md`.
+- Liveblocks-style editor canvas visual polish from the provided screenshot.
+- Shape panel from `context/feature-specs/12-shape-panel.md`.
+- Liveblocks-backed base canvas from `context/feature-specs/11-base-canvas.md`.
+- Liveblocks collaboration setup from `context/feature-specs/10-liveblocks-setup.md`.
 - Share dialog collaborator management from `context/feature-specs/09-share-dialog.md`.
 - Sidebar preference hydration mismatch fix.
 - Sidebar default setting moved into Clerk user settings.
@@ -54,9 +62,51 @@ Update this file whenever the current phase, active feature, or implementation s
 
 - `/api/projects` remains handler-protected instead of middleware-blocked so unauthenticated API requests return JSON `401` responses.
 - Allow local development and devtunnel origins for Next Server Actions in development so Clerk sign-out does not fail host/origin validation.
+- Liveblocks canvas auth uses app-verified project membership, private room permissions, and `identifyUser` ID tokens; collaborator removal revokes matching room user permissions before deleting the collaborator row.
 
 ## Session Notes
 
+- Completed canvas toolbar placement and pane panning regression fix.
+- Replaced the first overlay fix with React Flow `Panel` placement for the shape toolbar and minimap so React Flow keeps its own internal provider, blank-canvas panning remains wired to the pane, and the toolbar is still anchored at the bottom center.
+- Completed current issue cleanup for canvas shape insertion and Liveblocks room access revocation from `context/current-issues.md`.
+- Shared shape insertion now centers dropped nodes under the pointer, adds click and keyboard insertion at the viewport center, and generates canvas node IDs with `crypto.randomUUID()`.
+- Liveblocks auth now grants app-verified users room write access and issues ID tokens through `identifyUser`; collaborator removal resolves the removed email to Clerk user IDs and revokes those room permissions before deleting the collaborator row.
+- Started current issue cleanup for canvas shape insertion and Liveblocks room access revocation from `context/current-issues.md`.
+- Completed shape drag-and-drop regression fix on the editor canvas.
+- Fixed the canvas `dragover` gate so it checks the custom drag MIME type and calls `preventDefault()` without trying to read protected `DataTransfer` payload data before `drop`.
+- Kept the drag preview alive from the local drag-start payload and used the drop payload with a local fallback when creating nodes.
+- Started shape drag-and-drop regression fix after canvas `dragover` stopped allowing drops.
+- Started editor canvas overlay placement and initial zoom regression fix after the canvas controls rendered in normal flow.
+- Completed canvas connection handle and shape drag preview issue fixes from `context/current-issues.md`.
+- Added stable top, right, bottom, and left IDs to custom canvas node handles, enabled each visible handle to start or end a connection, increased handle size slightly, and raised the React Flow connection radius so connection drops are less finicky.
+- Added a shape drag preview overlay that follows the pointer over the canvas using the drag payload dimensions and shape icon, and clears on drop, drag end, or leaving the canvas.
+- Moved the active current issues for connection handles and drag preview into the resolved section of `context/current-issues.md`.
+- Started canvas connection handle and shape drag preview issue fixes from `context/current-issues.md`.
+- Completed Liveblocks-style editor canvas visual polish from the provided screenshot.
+- Changed the editor shell so the AI sidebar starts closed, the workspace canvas sits inside an inset rounded bordered surface, and the top actions use compact bordered dark buttons closer to the reference.
+- Tuned the editor navbar with a base-background top bar, larger project title, and muted subtitle.
+- Restyled the shape panel as a lower, translucent rounded pill with muted outline icons, tightened spacing, and screenshot-like hover/focus states.
+- Darkened and framed the React Flow minimap, tightened the dot-grid spacing, and added a grab cursor on the canvas pane.
+- Verified with `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `git diff --check`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started Liveblocks-style editor canvas visual polish from the provided screenshot.
+- Completed shape panel from `context/feature-specs/12-shape-panel.md`.
+- Added a bottom-center floating shape toolbar with draggable icon buttons for rectangle, diamond, circle, pill, cylinder, and hexagon.
+- Added validated shape drag payloads with shape, width, and height; canvas dragover and drop handling; screen-to-canvas coordinate conversion; node ID generation using shape name, timestamp, and a counter; and Liveblocks-backed node creation through React Flow node add changes.
+- Added a custom `canvasNode` renderer that displays newly dropped nodes as simple bordered rectangles with centered labels while preserving default node color data and shape metadata.
+- Verified with `npm run build`, `npm run lint`, and `git diff --check`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started implementation of `context/feature-specs/12-shape-panel.md`.
+- Completed Liveblocks-backed base canvas from `context/feature-specs/11-base-canvas.md`.
+- Added shared canvas schema types in `types/canvas.ts` with `canvasNode`, `canvasEdge`, the documented node color palette, and supported node shapes.
+- Replaced the workspace canvas placeholder with a Liveblocks-backed React Flow canvas using `/api/liveblocks-auth`, room-scoped `RoomProvider`, initial cursor presence, `ClientSideSuspense`, a connection error fallback, empty initial nodes and edges, loose connections, `fitView`, `MiniMap`, dot background, and Liveblocks cursors.
+- Typed the Liveblocks `flow` storage key for React Flow sync while keeping storage initialization handled by `useLiveblocksFlow`.
+- Verified with `npx tsc --noEmit`, `npm run build`, `npm run lint`, `git diff --check`, signed-out HTTP checks for `/editor` and `/sign-in` on the existing dev server, and a compiled CSS check for React Flow styles; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started implementation of `context/feature-specs/11-base-canvas.md`.
+- Completed Liveblocks collaboration setup from `context/feature-specs/10-liveblocks-setup.md`.
+- Added strict Liveblocks app types for cursor presence, AI thinking state, and user metadata with name, avatar, and cursor color.
+- Installed the missing `@liveblocks/node` package at the existing Liveblocks package version, added a cached server-only Liveblocks client, and added deterministic Clerk user ID to cursor color mapping.
+- Added `POST /api/liveblocks-auth` with Clerk authentication, owner-or-collaborator project access verification, private Liveblocks room creation, room-scoped write authorization, and Clerk-derived user metadata.
+- Verified with `npx tsc --noEmit`, `npm run lint`, and `npm run build`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
+- Started implementation of `context/feature-specs/10-liveblocks-setup.md`.
 - Started implementation of `context/feature-specs/09-share-dialog.md`.
 - Added share dialog collaborator management with owner-only invite, owner-only remove, read-only collaborator viewing, and project-link copy feedback.
 - Added collaborator `GET`, `POST`, and `DELETE` route logic with server-side ownership checks and Clerk Backend API enrichment for collaborator display names and avatars.
@@ -67,6 +117,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Capped the share dialog collaborator list with internal scrolling after four collaborators so the modal does not grow indefinitely.
 - Addressed Codex PR review feedback by making Clerk collaborator enrichment fail soft, keeping owner mutations auth-only, and serializing collaborator mutations during load/invite/remove.
 - Refined the share dialog toward the provided dark-mode reference with a wider modal, reference-style invite row, footer copy-link action, scroll-capped people list, accessible invite button labeling, and real avatar images with initials fallback.
+- Reworked the share dialog structure to more closely match the provided reference, with a custom wide modal shell, cleaner empty collaborator state, and fixed-size avatar image rendering.
 - Fixed the sidebar preference hydration mismatch by making `useSidebarPreference` render the same fallback state during SSR and the browser's initial render, then applying localStorage/sessionStorage preferences after mount.
 - Verified the hydration fix with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, signed-out HTTP checks for `/editor` and `/sign-in`, and a post-patch dev-server browser log tail with no new hydration error; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
 - Moved the local project sidebar default-open setting out of the project sidebar footer and into a custom Workspace page inside Clerk's `UserButton` user settings.
