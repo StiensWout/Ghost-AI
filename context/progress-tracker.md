@@ -12,6 +12,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+- Current issue verification cleanup for already-resolved project review findings.
 - Project API review follow-up fixes and current user-settings contrast cleanup.
 - Create-project room ID validation from `context/current-issues.md`.
 - Editor home real project API wiring from `context/feature-specs/07-wire-editor-home.md`.
@@ -50,6 +51,10 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Completed current issue verification cleanup for already-resolved project review findings.
+- Verified the pasted project API, Prisma, dialog, and sidebar findings against current code; each item was already addressed in the existing implementation, so no code changes were needed.
+- Restored `context/current-issues.md` to the real open sidebar-default setting and moved the stale pasted review list into a concise resolved verification note.
+- Verified with `DOTENV_CONFIG_PATH=.env.local npx prisma validate`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `git diff --check`; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
 - Completed project API review follow-up fixes and current user-settings contrast cleanup.
 - Folded project owner checks into `PATCH` and `DELETE` mutations, mapped missing or forbidden write results back to `404` or `403`, and mapped duplicate project ID create races to the existing `409` response.
 - Normalized collaborator email access checks, moved collaborator email storage to `CITEXT` with lowercase enforcement, and replaced the project created-at index with the owner plus `updatedAt DESC` listing index.
