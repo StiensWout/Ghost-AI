@@ -53,6 +53,7 @@ export function ShareProjectDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const isMutating = isInviting || removingEmail !== null
+  const isCollaboratorMutationDisabled = isLoading || isMutating
   const hasScrollableCollaboratorList = collaborators.length > 4
 
   useEffect(() => {
@@ -129,7 +130,7 @@ export function ShareProjectDialog({
 
     const collaboratorEmail = email.trim()
 
-    if (!collaboratorEmail || isInviting) {
+    if (!collaboratorEmail || isCollaboratorMutationDisabled) {
       return
     }
 
@@ -157,7 +158,7 @@ export function ShareProjectDialog({
   }
 
   async function removeCollaborator(emailToRemove: string) {
-    if (removingEmail !== null) {
+    if (isCollaboratorMutationDisabled) {
       return
     }
 
@@ -256,7 +257,10 @@ export function ShareProjectDialog({
                     />
                     <Button
                       type="submit"
-                      disabled={email.trim().length === 0 || isInviting}
+                      disabled={
+                        email.trim().length === 0 ||
+                        isCollaboratorMutationDisabled
+                      }
                     >
                       {isInviting ? (
                         <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -329,7 +333,7 @@ export function ShareProjectDialog({
                         collaborators={collaborators}
                         canManage={canManage}
                         removingEmail={removingEmail}
-                        isDisabled={isMutating}
+                        isDisabled={isCollaboratorMutationDisabled}
                         onRemove={removeCollaborator}
                       />
                     </ScrollArea>
@@ -338,7 +342,7 @@ export function ShareProjectDialog({
                       collaborators={collaborators}
                       canManage={canManage}
                       removingEmail={removingEmail}
-                      isDisabled={isMutating}
+                      isDisabled={isCollaboratorMutationDisabled}
                       onRemove={removeCollaborator}
                     />
                   )

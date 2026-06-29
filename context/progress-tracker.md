@@ -65,6 +65,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Polished the share dialog desktop layout so it stays centered and constrained on laptop-width screens instead of stretching across the viewport.
 - Adjusted the share dialog body back to three stacked sections: invite, project link, and collaborator list.
 - Capped the share dialog collaborator list with internal scrolling after four collaborators so the modal does not grow indefinitely.
+- Addressed Codex PR review feedback by making Clerk collaborator enrichment fail soft, keeping owner mutations auth-only, and serializing collaborator mutations during load/invite/remove.
 - Fixed the sidebar preference hydration mismatch by making `useSidebarPreference` render the same fallback state during SSR and the browser's initial render, then applying localStorage/sessionStorage preferences after mount.
 - Verified the hydration fix with `npx tsc --noEmit`, `npm run lint`, `npm run build`, `git diff --check`, signed-out HTTP checks for `/editor` and `/sign-in`, and a post-patch dev-server browser log tail with no new hydration error; lint still reports the existing warning in `.agents/skills/clerk-tanstack-patterns/templates/tanstack-basic-auth/src/routes/__root.tsx`.
 - Moved the local project sidebar default-open setting out of the project sidebar footer and into a custom Workspace page inside Clerk's `UserButton` user settings.

@@ -46,28 +46,44 @@ async function getClerkUsersByEmail(emails: string[]) {
     return new Map<string, ClerkUserProfile>()
   }
 
-  const client = await clerkClient()
   const usersByEmail = new Map<string, ClerkUserProfile>()
+  const client = await getClerkClientOrNull()
+
+  if (!client) {
+    return usersByEmail
+  }
 
   for (const emailBatch of chunkArray(uniqueEmails, 100)) {
-    const users = await client.users.getUserList({
-      emailAddress: emailBatch,
-      limit: emailBatch.length,
-    })
+    try {
+      const users = await client.users.getUserList({
+        emailAddress: emailBatch,
+        limit: emailBatch.length,
+      })
 
-    for (const user of users.data) {
-      const profile = serializeClerkUserProfile(user)
+      for (const user of users.data) {
+        const profile = serializeClerkUserProfile(user)
 
-      for (const emailAddress of user.emailAddresses) {
-        usersByEmail.set(
-          normalizeCollaboratorEmail(emailAddress.emailAddress),
-          profile
-        )
+        for (const emailAddress of user.emailAddresses) {
+          usersByEmail.set(
+            normalizeCollaboratorEmail(emailAddress.emailAddress),
+            profile
+          )
+        }
       }
+    } catch {
+      continue
     }
   }
 
   return usersByEmail
+}
+
+async function getClerkClientOrNull() {
+  try {
+    return await clerkClient()
+  } catch {
+    return null
+  }
 }
 
 function serializeClerkUserProfile(user: User): ClerkUserProfile {

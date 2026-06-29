@@ -6,6 +6,7 @@ import {
   normalizeCollaboratorEmail,
   readJsonObject,
   readRequiredCollaboratorEmail,
+  requireAuthenticatedUser,
 } from "@/lib/project-api"
 
 interface ProjectCollaboratorsRouteContext {
@@ -57,10 +58,10 @@ export async function POST(
   request: Request,
   context: ProjectCollaboratorsRouteContext
 ) {
-  const identity = await getCurrentProjectIdentity()
+  const authResult = await requireAuthenticatedUser()
 
-  if (!identity) {
-    return jsonError("Unauthorized", 401)
+  if (!authResult.ok) {
+    return authResult.response
   }
 
   const { projectId } = await context.params
@@ -78,7 +79,7 @@ export async function POST(
 
   const ownerAccess = await requireProjectOwner({
     projectId,
-    userId: identity.userId,
+    userId: authResult.user.userId,
   })
 
   if (!ownerAccess.ok) {
@@ -115,10 +116,10 @@ export async function DELETE(
   request: Request,
   context: ProjectCollaboratorsRouteContext
 ) {
-  const identity = await getCurrentProjectIdentity()
+  const authResult = await requireAuthenticatedUser()
 
-  if (!identity) {
-    return jsonError("Unauthorized", 401)
+  if (!authResult.ok) {
+    return authResult.response
   }
 
   const { projectId } = await context.params
@@ -136,7 +137,7 @@ export async function DELETE(
 
   const ownerAccess = await requireProjectOwner({
     projectId,
-    userId: identity.userId,
+    userId: authResult.user.userId,
   })
 
   if (!ownerAccess.ok) {
