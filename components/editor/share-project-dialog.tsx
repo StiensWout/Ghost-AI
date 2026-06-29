@@ -4,7 +4,7 @@ import type { FormEvent } from "react"
 import { useEffect, useState } from "react"
 import {
   Check,
-  Copy,
+  Link2,
   LoaderCircle,
   Share2,
   Trash2,
@@ -32,7 +32,7 @@ interface ShareProjectDialogProps {
 type CopyStatus = "idle" | "copied" | "error"
 
 const shareInputClassName =
-  "border-surface-border-subtle bg-surface text-copy-primary caret-brand placeholder:text-copy-muted"
+  "h-11 rounded-xl border-surface-border-subtle bg-surface px-4 text-sm text-copy-primary caret-brand placeholder:text-copy-muted"
 
 export function ShareProjectDialog({
   projectId,
@@ -48,7 +48,6 @@ export function ShareProjectDialog({
     ProjectCollaboratorResource[]
   >([])
   const [email, setEmail] = useState("")
-  const [workspaceUrl, setWorkspaceUrl] = useState(workspacePath)
   const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -108,7 +107,6 @@ export function ShareProjectDialog({
 
   function openShareDialog() {
     setCanManage(canManageProject)
-    setWorkspaceUrl(getWorkspaceUrl(workspacePath))
     setCopyStatus("idle")
     setErrorMessage(null)
     setIsOpen(true)
@@ -182,7 +180,6 @@ export function ShareProjectDialog({
 
     try {
       await navigator.clipboard.writeText(projectUrl)
-      setWorkspaceUrl(projectUrl)
       setCopyStatus("copied")
     } catch {
       setCopyStatus("error")
@@ -221,114 +218,105 @@ export function ShareProjectDialog({
               ? "Invite collaborators and manage workspace access."
               : "Current workspace collaborators."
           }
-          className="w-[min(calc(100vw-2rem),44rem)] max-w-none sm:max-w-none"
+          className="w-[min(calc(100vw-2rem),54rem)] max-w-none gap-7 sm:max-w-none"
           footer={
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isMutating}
-              onClick={closeShareDialog}
-            >
-              Done
-            </Button>
+            <>
+              {canManage ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={isMutating}
+                  className="sm:mr-auto text-brand hover:bg-accent-dim hover:text-brand"
+                  onClick={copyProjectLink}
+                >
+                  {copyStatus === "copied" ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Link2 className="h-4 w-4" />
+                  )}
+                  <span>
+                    {copyStatus === "copied"
+                      ? "Copied link"
+                      : copyStatus === "error"
+                        ? "Copy failed"
+                        : "Copy link"}
+                  </span>
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isMutating}
+                onClick={closeShareDialog}
+              >
+                Done
+              </Button>
+            </>
           }
         >
-          <div className="space-y-5">
+          <div className="space-y-7">
             {canManage ? (
-              <>
-                <form className="space-y-2" onSubmit={inviteCollaborator}>
-                  <label
-                    htmlFor="share-project-email"
-                    className="text-sm font-medium text-copy-primary"
-                  >
-                    Email address
-                  </label>
-                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-                    <Input
-                      id="share-project-email"
-                      type="email"
-                      value={email}
-                      onChange={(event) => {
-                        setEmail(event.target.value)
-                        setErrorMessage(null)
-                      }}
-                      placeholder="teammate@example.com"
-                      className={shareInputClassName}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={
-                        email.trim().length === 0 ||
-                        isCollaboratorMutationDisabled
-                      }
-                    >
-                      {isInviting ? (
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <UserRoundPlus className="h-4 w-4" />
-                      )}
-                      <span className="hidden sm:inline">
-                        {isInviting ? "Inviting..." : "Invite"}
-                      </span>
-                    </Button>
-                  </div>
-                </form>
-
-                <div className="space-y-2 rounded-xl border border-surface-border bg-subtle px-3 py-3">
-                  <p className="text-xs font-medium uppercase text-copy-faint">
-                    Project link
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-                    <Input
-                      readOnly
-                      value={workspaceUrl}
-                      className="border-surface-border-subtle bg-surface font-mono text-xs text-copy-secondary"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={copyProjectLink}
-                    >
-                      {copyStatus === "copied" ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                      <span>
-                        {copyStatus === "copied"
-                          ? "Copied!"
-                          : copyStatus === "error"
-                            ? "Copy failed"
-                            : "Copy"}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-              </>
+              <form
+                className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem]"
+                onSubmit={inviteCollaborator}
+              >
+                <label htmlFor="share-project-email" className="sr-only">
+                  Email address
+                </label>
+                <Input
+                  id="share-project-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    setErrorMessage(null)
+                  }}
+                  placeholder="Add others by email"
+                  className={shareInputClassName}
+                />
+                <Button
+                  type="submit"
+                  aria-label={
+                    isInviting ? "Inviting collaborator" : "Invite collaborator"
+                  }
+                  className="h-11 rounded-xl text-sm font-semibold"
+                  disabled={
+                    email.trim().length === 0 ||
+                    isCollaboratorMutationDisabled
+                  }
+                >
+                  {isInviting ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserRoundPlus className="h-4 w-4" />
+                  )}
+                  <span>{isInviting ? "Inviting..." : "Invite"}</span>
+                </Button>
+              </form>
             ) : null}
 
-            <section className="space-y-3">
+            <section className="space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-brand" />
-                  <h3 className="text-sm font-medium text-copy-primary">
-                    Collaborators
+                  <h3 className="text-base font-medium text-copy-primary">
+                    People with access
                   </h3>
                 </div>
-                <span className="font-mono text-xs text-copy-muted">
+                <span className="font-mono text-sm text-copy-muted">
                   {collaborators.length}
                 </span>
               </div>
 
-              <div className="rounded-xl border border-surface-border bg-surface">
+              <div className="overflow-hidden rounded-2xl border border-surface-border bg-surface">
                 {isLoading ? (
-                  <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-copy-muted">
+                  <div className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-copy-muted">
                     <LoaderCircle className="h-4 w-4 animate-spin" />
                     <span>Loading collaborators</span>
                   </div>
                 ) : collaborators.length > 0 ? (
                   hasScrollableCollaboratorList ? (
-                    <ScrollArea className="h-64 max-h-[35vh]">
+                    <ScrollArea className="h-80 max-h-[40vh]">
                       <CollaboratorList
                         collaborators={collaborators}
                         canManage={canManage}
@@ -347,7 +335,7 @@ export function ShareProjectDialog({
                     />
                   )
                 ) : (
-                  <p className="px-4 py-8 text-center text-sm text-copy-muted">
+                  <p className="px-5 py-12 text-center text-sm text-copy-muted">
                     No collaborators yet.
                   </p>
                 )}
@@ -416,13 +404,15 @@ function CollaboratorRow({
   const secondaryText = collaborator.displayName ? collaborator.email : "Email only"
 
   return (
-    <div className="flex items-center gap-3 px-3 py-3">
+    <div className="flex min-h-20 items-center gap-4 px-5 py-3">
       <CollaboratorAvatar collaborator={collaborator} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-copy-primary">
+        <p className="truncate text-base font-medium leading-tight text-copy-primary">
           {displayName}
         </p>
-        <p className="truncate text-xs text-copy-muted">{secondaryText}</p>
+        <p className="truncate text-sm leading-6 text-copy-muted">
+          {secondaryText}
+        </p>
       </div>
       {canManage ? (
         <Button
@@ -451,18 +441,26 @@ function CollaboratorAvatar({
 }: {
   collaborator: ProjectCollaboratorResource
 }) {
-  if (collaborator.avatarUrl) {
+  const avatarUrl = collaborator.avatarUrl
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null)
+
+  if (avatarUrl && failedAvatarUrl !== avatarUrl) {
     return (
-      <div
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={avatarUrl}
+        alt=""
         aria-hidden="true"
-        className="size-9 shrink-0 rounded-xl border border-surface-border bg-cover bg-center"
-        style={{ backgroundImage: `url(${collaborator.avatarUrl})` }}
+        draggable={false}
+        referrerPolicy="no-referrer"
+        className="size-12 shrink-0 rounded-full border border-surface-border bg-subtle object-cover"
+        onError={() => setFailedAvatarUrl(avatarUrl)}
       />
     )
   }
 
   return (
-    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-surface-border bg-accent-dim font-mono text-xs text-brand">
+    <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-surface-border bg-accent-dim font-mono text-sm text-brand">
       {getCollaboratorInitials(collaborator)}
     </div>
   )
