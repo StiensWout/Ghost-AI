@@ -17,7 +17,6 @@ import { Dialog } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { EditorDialogContent } from "@/components/editor/editor-dialog"
-import { cn } from "@/lib/utils"
 import type {
   ProjectCollaboratorResource,
   ProjectCollaboratorResponse,
@@ -54,6 +53,7 @@ export function ShareProjectDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const isMutating = isInviting || removingEmail !== null
+  const hasScrollableCollaboratorList = collaborators.length > 4
 
   useEffect(() => {
     if (!isOpen) {
@@ -232,16 +232,9 @@ export function ShareProjectDialog({
             </Button>
           }
         >
-          <div
-            className={cn(
-              "grid gap-5",
-              canManage
-                ? "md:grid-cols-[minmax(0,1fr)_17rem]"
-                : "md:grid-cols-1"
-            )}
-          >
+          <div className="space-y-5">
             {canManage ? (
-              <div className="space-y-4">
+              <>
                 <form className="space-y-2" onSubmit={inviteCollaborator}>
                   <label
                     htmlFor="share-project-email"
@@ -307,7 +300,7 @@ export function ShareProjectDialog({
                     </Button>
                   </div>
                 </div>
-              </div>
+              </>
             ) : null}
 
             <section className="space-y-3">
@@ -330,20 +323,25 @@ export function ShareProjectDialog({
                     <span>Loading collaborators</span>
                   </div>
                 ) : collaborators.length > 0 ? (
-                  <ScrollArea className="max-h-60">
-                    <div className="divide-y divide-surface-border">
-                      {collaborators.map((collaborator) => (
-                        <CollaboratorRow
-                          key={collaborator.email}
-                          collaborator={collaborator}
-                          canManage={canManage}
-                          isRemoving={removingEmail === collaborator.email}
-                          isDisabled={isMutating}
-                          onRemove={removeCollaborator}
-                        />
-                      ))}
-                    </div>
-                  </ScrollArea>
+                  hasScrollableCollaboratorList ? (
+                    <ScrollArea className="h-64 max-h-[35vh]">
+                      <CollaboratorList
+                        collaborators={collaborators}
+                        canManage={canManage}
+                        removingEmail={removingEmail}
+                        isDisabled={isMutating}
+                        onRemove={removeCollaborator}
+                      />
+                    </ScrollArea>
+                  ) : (
+                    <CollaboratorList
+                      collaborators={collaborators}
+                      canManage={canManage}
+                      removingEmail={removingEmail}
+                      isDisabled={isMutating}
+                      onRemove={removeCollaborator}
+                    />
+                  )
                 ) : (
                   <p className="px-4 py-8 text-center text-sm text-copy-muted">
                     No collaborators yet.
@@ -361,6 +359,37 @@ export function ShareProjectDialog({
         </EditorDialogContent>
       </Dialog>
     </>
+  )
+}
+
+interface CollaboratorListProps {
+  collaborators: ProjectCollaboratorResource[]
+  canManage: boolean
+  removingEmail: string | null
+  isDisabled: boolean
+  onRemove: (email: string) => void
+}
+
+function CollaboratorList({
+  collaborators,
+  canManage,
+  removingEmail,
+  isDisabled,
+  onRemove,
+}: CollaboratorListProps) {
+  return (
+    <div className="divide-y divide-surface-border">
+      {collaborators.map((collaborator) => (
+        <CollaboratorRow
+          key={collaborator.email}
+          collaborator={collaborator}
+          canManage={canManage}
+          isRemoving={removingEmail === collaborator.email}
+          isDisabled={isDisabled}
+          onRemove={onRemove}
+        />
+      ))}
+    </div>
   )
 }
 
